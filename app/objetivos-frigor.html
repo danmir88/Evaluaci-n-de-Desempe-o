@@ -1,0 +1,1217 @@
+<title>Objetivos Ejecutivos FRIGOR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: barra superior con contexto (año, gerencia) + pestañas; cada pestaña es una hoja de trabajo de ancho completo, tablas con scroll propio. */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --surface-2:#EBEFF3; --line:#D5DCE3; --fg:#18222D; --muted:#5B6878;
+  --accent:#1F5D8C; --accent-soft:#E2ECF5; --accent-fg:#FFFFFF;
+  --ok:#1E7A4F; --ok-soft:#E1F2E9; --warn:#A86A00; --warn-soft:#FBF0DA; --bad:#B23A30; --bad-soft:#F9E3E0; --info-soft:#EEF0F4;
+  --p-fin:#1E5FA8; --p-cli:#1E8A72; --p-pro:#C77B22; --p-gen:#7A4FA0;
+  --font-display:'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-body:'IBM Plex Sans', 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-data:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#11161C; --surface:#18202A; --surface-2:#202A36; --line:#2E3A48; --fg:#E4E9EF; --muted:#97A3B2;
+  --accent:#6FA8D8; --accent-soft:#1D3247; --accent-fg:#0E1620;
+  --ok:#5CC08E; --ok-soft:#173326; --warn:#E3A84A; --warn-soft:#3A2C12; --bad:#EE7A6E; --bad-soft:#3D1D1A; --info-soft:#222B36;
+  --p-fin:#7AA9E0; --p-cli:#5FC4AA; --p-pro:#E6A85C; --p-gen:#B79AD6; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#11161C; --surface:#18202A; --surface-2:#202A36; --line:#2E3A48; --fg:#E4E9EF; --muted:#97A3B2;
+  --accent:#6FA8D8; --accent-soft:#1D3247; --accent-fg:#0E1620;
+  --ok:#5CC08E; --ok-soft:#173326; --warn:#E3A84A; --warn-soft:#3A2C12; --bad:#EE7A6E; --bad-soft:#3D1D1A; --info-soft:#222B36;
+  --p-fin:#7AA9E0; --p-cli:#5FC4AA; --p-pro:#E6A85C; --p-gen:#B79AD6; color-scheme:dark; }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:14px;line-height:1.5}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h2{font-size:20px;font-weight:700}
+h3{font-size:15px;font-weight:700}
+p{margin:0}
+.num,.mono{font-family:var(--font-data);font-variant-numeric:tabular-nums}
+.wrap{max-width:1280px;margin:0 auto;padding-inline:16px}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+
+/* Top bar */
+header.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.top-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-block:12px}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto;min-width:0}
+.brand h1{font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.02em}
+.brand .tag{font-size:12px;color:var(--muted)}
+.ctx{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ctx label{display:flex;flex-direction:column;gap:2px}
+.store-badge{font-size:11.5px;padding:3px 8px;border-radius:99px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+.store-badge.shared{background:var(--ok-soft);color:var(--ok)}
+.store-badge.local{background:var(--warn-soft);color:var(--warn)}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font:600 13.5px var(--font-body);color:var(--muted);cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+nav.tabs button:hover{color:var(--fg)}
+
+main{padding-block:20px 60px}
+section.view{display:flex;flex-direction:column;gap:18px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.panel-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;justify-content:space-between;margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.g4 > *, .g3 > *, .g2 > *{min-width:0}
+
+/* Controls */
+select,input,textarea{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 9px;min-width:0}
+textarea{width:100%;resize:vertical;min-height:60px}
+input[type="number"]{font-family:var(--font-data)}
+select:focus,input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn{font:600 13px var(--font-body);border-radius:6px;padding:8px 13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:none;color:var(--accent);padding-inline:6px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field > span{font-size:12px;font-weight:600;color:var(--muted)}
+.field small{font-size:11.5px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:7px 12px;font:600 12.5px var(--font-body);color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;text-align:left;background:var(--surface-2);padding:8px 10px;white-space:nowrap}
+td{padding:9px 10px;border-top:1px solid var(--line);vertical-align:top}
+td.r,th.r{text-align:right}
+td.c,th.c{text-align:center}
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:var(--accent-soft)}
+tfoot td{font-weight:600;background:var(--surface-2)}
+
+/* Chips */
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap;background:var(--info-soft);color:var(--muted)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.acc{background:var(--accent-soft);color:var(--accent)}
+.pilar{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:4px;color:#fff;white-space:nowrap}
+.pilar.FIN{background:var(--p-fin)} .pilar.CLI{background:var(--p-cli)} .pilar.PRO{background:var(--p-pro)} .pilar.GEN{background:var(--p-gen)}
+:root[data-theme="dark"] .pilar{color:#10161d}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .pilar{color:#10161d} }
+.rating{font-weight:700}
+.r1{color:var(--bad)} .r2{color:var(--warn)} .r3{color:var(--fg)} .r4{color:var(--ok)} .r5{color:var(--accent)}
+
+/* KPI tiles */
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.tile .big{font-family:var(--font-display);font-size:28px;font-weight:700;line-height:1.1}
+
+/* Alerts list */
+.alerts{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.alerts li{display:flex;gap:8px;align-items:flex-start;font-size:13px;padding:7px 10px;border-radius:6px;background:var(--info-soft)}
+.alerts li.bad{background:var(--bad-soft)} .alerts li.warn{background:var(--warn-soft)} .alerts li.ok{background:var(--ok-soft)}
+.alerts b{font-weight:600}
+
+/* Steps / calendar */
+.timeline{display:grid;gap:0;border-left:2px solid var(--line);margin-left:6px}
+.tl-item{position:relative;padding:0 0 14px 18px}
+.tl-item::before{content:"";position:absolute;left:-7px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--line)}
+.tl-item.now::before{border-color:var(--accent);background:var(--accent)}
+.tl-item.done::before{border-color:var(--ok);background:var(--ok)}
+.tl-item .when{font-family:var(--font-data);font-size:12px;color:var(--muted)}
+
+/* Drawer editor */
+.drawer-bg{position:fixed;inset:0;background:rgba(10,16,24,.45);z-index:50;display:flex;justify-content:flex-end}
+.drawer{background:var(--bg);width:min(760px,100%);height:100%;overflow-y:auto;padding:0 0 calc(80px + env(safe-area-inset-bottom,0px))}
+.drawer-head{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;gap:10px;z-index:2}
+.drawer-body{padding:16px 18px;display:flex;flex-direction:column;gap:16px}
+.drawer-foot{position:fixed;bottom:0;right:0;width:min(760px,100%);background:var(--surface);border-top:1px solid var(--line);padding:12px 18px calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+fieldset{border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:0;background:var(--surface);display:flex;flex-direction:column;gap:12px;min-width:0}
+legend{font-family:var(--font-display);font-weight:700;font-size:14px;padding:0 6px}
+.statement{background:var(--accent-soft);border-radius:var(--r);padding:12px 14px;font-size:14px}
+.hint{font-size:12.5px;padding:7px 10px;border-radius:6px;background:var(--warn-soft);color:var(--fg)}
+.hint.info{background:var(--info-soft)}
+.hito-row{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.6fr) 90px 80px 34px;gap:6px;align-items:start}
+@media (max-width:640px){.hito-row{grid-template-columns:1fr 1fr}.hito-row .hito-del{justify-self:end}}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:6px;font-size:13px;z-index:80}
+.confirm-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-radius:6px;background:var(--bad-soft)}
+.eval-real{width:110px}
+.hitos-eval{display:flex;flex-direction:column;gap:4px;min-width:260px}
+.hitos-eval label{display:flex;gap:6px;align-items:center;font-size:12.5px}
+.hitos-eval select{padding:3px 6px;font-size:12px}
+.curve svg text{fill:var(--muted);font-family:var(--font-data);font-size:10px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+details.ev-more summary{cursor:pointer;color:var(--accent);font-size:12.5px}
+.prose{max-width:72ch;display:flex;flex-direction:column;gap:10px}
+.prose ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="brand"><h1>Objetivos Ejecutivos</h1><span class="tag">FRIGOR · Gestión del desempeño — componente 1: objetivos</span></div>
+      <div class="ctx">
+        <label class="field"><span>Año</span><select id="ctxYear"></select></label>
+        <label class="field"><span>Gerencia</span><select id="ctxGer"></select></label>
+        <span id="storeBadge" class="store-badge">Conectando…</span>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-view="inicio" aria-selected="true">Inicio</button>
+      <button role="tab" data-view="objetivos" aria-selected="false">Objetivos</button>
+      <button role="tab" data-view="evaluacion" aria-selected="false">Evaluación trimestral</button>
+      <button role="tab" data-view="consolidado" aria-selected="false">Consolidado</button>
+      <button role="tab" data-view="reglas" aria-selected="false">Reglas del modelo</button>
+      <button role="tab" data-view="datos" aria-selected="false">Datos</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- INICIO -->
+  <section class="view" id="v-inicio">
+    <div class="grid g4" id="homeTiles"></div>
+    <div class="grid g2">
+      <div class="panel">
+        <div class="panel-head"><h2>Qué toca ahora</h2></div>
+        <div class="timeline" id="homeTimeline"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Cómo se usa</h2></div>
+        <ol class="prose" style="padding-left:18px;margin:0">
+          <li><b>Objetivos.</b> Cada gerencia tiene un <i>scorecard</i> de 3 a 7 objetivos que suman 100% de peso. Cada objetivo es un indicador (con umbral, meta y sobresaliente) o un proyecto (con hitos ponderados).</li>
+          <li><b>Evaluación trimestral.</b> Al cierre de cada trimestre registras el valor real acumulado o los hitos logrados. El puntaje se calcula solo.</li>
+          <li><b>Envío y calibración.</b> El gerente envía su evaluación; GTH y el comité la calibran con evidencia. El cierre anual es el resultado acumulado a T4.</li>
+          <li><b>SALAR.</b> Exporta desde <i>Datos</i> los CSV listos para cargar al sistema oficial.</li>
+        </ol>
+        <p class="small muted" style="margin-top:12px">Las validaciones avisan, no bloquean. Un objetivo puede guardarse como borrador con datos pendientes y completarse después.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Alertas de calidad</h2><span class="small muted" id="homeAlertsScope"></span></div>
+      <ul class="alerts" id="homeAlerts"></ul>
+    </div>
+  </section>
+
+  <!-- OBJETIVOS -->
+  <section class="view" id="v-objetivos" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <div><h2 id="scTitle">Scorecard</h2><p class="small muted" id="scSub"></p></div>
+        <div class="row">
+          <label class="row small"><input type="checkbox" id="scShowAll"> Ver todas las gerencias</label>
+          <button class="btn primary" id="btnNewObj">+ Nuevo objetivo</button>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table id="scTable"></table></div>
+    </div>
+    <div class="grid g2">
+      <div class="panel"><div class="panel-head"><h3>Validación del scorecard</h3></div><ul class="alerts" id="scAlerts"></ul></div>
+      <div class="panel"><div class="panel-head"><h3>Peso por pilar estratégico</h3></div><div id="scPilares"></div></div>
+    </div>
+  </section>
+
+  <!-- EVALUACION -->
+  <section class="view" id="v-evaluacion" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <div><h2 id="evTitle">Evaluación</h2><p class="small muted" id="evSub"></p></div>
+        <div class="row">
+          <div class="seg" id="evQSeg"></div>
+          <label class="row small"><input type="checkbox" id="evCalib"> Modo calibración</label>
+        </div>
+      </div>
+      <div id="evClosedNote"></div>
+      <div class="tbl-wrap"><table id="evTable"></table></div>
+      <div class="row" style="margin-top:14px;justify-content:space-between">
+        <div id="evTotal"></div>
+        <div class="row" id="evActions"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONSOLIDADO -->
+  <section class="view" id="v-consolidado" hidden>
+    <div class="grid g4" id="coTiles"></div>
+    <div class="panel">
+      <div class="panel-head"><h2>Resultado por gerencia</h2><span class="small muted">Puntaje ponderado del trimestre (acumulado al cierre). T4 = resultado anual.</span></div>
+      <div class="tbl-wrap"><table id="coTable"></table></div>
+    </div>
+    <div class="grid g2">
+      <div class="panel"><div class="panel-head"><h3>Distribución de calificaciones</h3><div class="seg" id="coQSeg"></div></div><div id="coDist"></div></div>
+      <div class="panel"><div class="panel-head"><h3>Cobertura por pilar (peso %)</h3></div><div class="tbl-wrap"><table id="coPilar"></table></div></div>
+    </div>
+  </section>
+
+  <!-- REGLAS -->
+  <section class="view" id="v-reglas" hidden>
+    <div class="grid g2">
+      <div class="panel">
+        <div class="panel-head"><h2>Curva de logro de un indicador</h2></div>
+        <div class="curve" id="curveBox"></div>
+        <p class="small muted" style="margin-top:8px">Debajo del umbral el objetivo aporta 0. Entre umbral y meta, de 50 a 100 en línea recta. Entre meta y sobresaliente, de 100 a 120. El tope es 120.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Escala de calificación</h2></div>
+        <div class="tbl-wrap"><table id="ratingTable"></table></div>
+        <p class="small muted" style="margin-top:8px">La calificación usa el puntaje ponderado del scorecard. Esta misma escala de 5 niveles servirá después para el componente de competencias.</p>
+      </div>
+    </div>
+    <div class="grid g3">
+      <div class="panel prose"><h3>Construcción del scorecard</h3><ul>
+        <li>3 a 7 objetivos por ejecutivo, que suman 100%.</li>
+        <li>Peso por objetivo entre 10% y 40%.</li>
+        <li>Al menos 60% del peso en indicadores de resultado; proyectos con hitos hasta 40%.</li>
+        <li>Cada objetivo se vincula a un pilar estratégico de FRIGOR.</li>
+        <li>Metas trimestrales <b>acumuladas</b> (año a la fecha), no repartos lineales automáticos.</li>
+      </ul></div>
+      <div class="panel prose"><h3>Indicadores y proyectos</h3><ul>
+        <li><b>Indicador:</b> línea base real, umbral (≈ 80–90% de probabilidad de lograrse), meta (≈ 50%) y sobresaliente (≈ 10–20%).</li>
+        <li><b>Proyecto:</b> 3 a 6 hitos verificables con trimestre comprometido y peso. Se paga lo entregado, no el % de avance declarado.</li>
+        <li>Cada dato tiene fuente y un responsable del dato distinto del evaluado cuando sea posible.</li>
+      </ul></div>
+      <div class="panel prose"><h3>Ajustes y calibración</h3><ul>
+        <li>Metas fijas en el año. Solo se revisan en la ventana de julio y por eventos externos materiales aprobados por Gerencia General.</li>
+        <li>La calibración puede ajustar ±20 puntos un objetivo con motivo escrito.</li>
+        <li>Un evento grave de inocuidad, seguridad o ética puede reducir el resultado por decisión del comité.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- DATOS -->
+  <section class="view" id="v-datos" hidden>
+    <div class="grid g2">
+      <div class="panel">
+        <div class="panel-head"><h2>Exportar</h2></div>
+        <div class="row">
+          <button class="btn" id="btnCsvObj">CSV objetivos (año)</button>
+          <button class="btn" id="btnCsvEval">CSV evaluaciones (año)</button>
+          <button class="btn" id="btnJsonBackup">Respaldo completo (.json)</button>
+        </div>
+        <p class="small muted" style="margin-top:10px">Los CSV usan punto y coma y codificación UTF-8, listos para Excel y para la carga en SALAR.</p>
+        <div id="exportFallback"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Importar</h2></div>
+        <div class="field">
+          <span>Archivo .json (respaldo de esta herramienta o exportación del Constructor SMART anterior)</span>
+          <input type="file" id="importFile" accept=".json,application/json">
+        </div>
+        <p class="small muted" style="margin-top:8px">Los objetivos con el mismo ID se actualizan; los nuevos se agregan. Del Constructor anterior se toman los objetivos y el último check-in de cada trimestre como valor real.</p>
+        <div id="importResult" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="panel">
+        <div class="panel-head"><h2>Gerencias</h2></div>
+        <div class="tbl-wrap"><table id="gerTable"></table></div>
+        <div class="row" style="margin-top:10px">
+          <input id="gerNew" placeholder="Nombre de la gerencia" style="flex:1 1 200px">
+          <select id="gerParent"></select>
+          <button class="btn" id="btnAddGer">Agregar</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Tu nombre</h2></div>
+        <div class="row"><input id="userName" placeholder="Nombre y cargo" style="flex:1 1 220px"><button class="btn" id="btnSaveUser">Guardar</button></div>
+        <p class="small muted" style="margin-top:8px">Se usa para firmar cambios y envíos en la bitácora. Queda guardado solo en este navegador.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Bitácora de cambios</h2><span class="small muted">Últimos 200 movimientos</span></div>
+      <div class="tbl-wrap"><table id="logTable"></table></div>
+    </div>
+  </section>
+</main>
+
+<div id="drawerRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+'use strict';
+// ====================== Configuración del modelo ======================
+const PILARES = {
+  FIN:{corto:'Financiera', nombre:'BUSCAMOS SER LOS MEJORES EN LO QUE HACEMOS'},
+  CLI:{corto:'Clientes',   nombre:'LLEVAMOS CALIDAD Y CONFIANZA AL CLIENTE'},
+  PRO:{corto:'Procesos',   nombre:'EVOLUCIONAMOS PARA SER SOSTENIBLES'},
+  GEN:{corto:'Gente',      nombre:'NUESTRO TALENTO ES LA BASE DE LA CALIDAD'},
+};
+const QS = ['T1','T2','T3','T4'];
+// Trimestres que se evalúan por año. 2026 es año de transición: solo T3 y T4.
+const ANIOS = {2026:{evalua:['T3','T4'], nota:'Año de transición: se evalúan T3 y T4 con pesos y bandas definidos en octubre 2026.'},
+               2027:{evalua:QS, nota:'Primer año completo del modelo.'}};
+const RATINGS = [
+  {n:5, min:115, nombre:'Excepcional', desc:'Supera de forma amplia la mayoría de metas.'},
+  {n:4, min:105, nombre:'Supera', desc:'Logra todas las metas y supera varias.'},
+  {n:3, min:90,  nombre:'Cumple', desc:'Logra las metas comprometidas.'},
+  {n:2, min:70,  nombre:'Cumple parcialmente', desc:'Logra parte de las metas; requiere plan de mejora.'},
+  {n:1, min:0,   nombre:'No cumple', desc:'Queda bajo el umbral en la mayoría de metas.'},
+];
+const CALENDARIO = [
+  {f:'2026-10-07', h:'2026-10-16', t:'Cierre T3 2026: validar pesos, bandas y metas T3/T4 de los objetivos vigentes'},
+  {f:'2026-10-12', h:'2026-10-23', t:'Carga de resultados reales T3 (acumulado a septiembre) y envío a GTH'},
+  {f:'2026-10-26', h:'2026-10-30', t:'Calibración T3 y conversación de retroalimentación con cada gerente'},
+  {f:'2026-10-19', h:'2026-11-06', t:'2027: Gerencia General define scorecard corporativo con el presupuesto 2027'},
+  {f:'2026-11-09', h:'2026-11-27', t:'2027: Divisiones y gerencias proponen sus scorecards (catchball)'},
+  {f:'2026-11-30', h:'2026-12-11', t:'2027: Calibración de calidad de objetivos y aprobación'},
+  {f:'2027-01-04', h:'2027-01-22', t:'Cierre anual 2026 (T4 acumulado), calibración y ratificación de líneas base 2027'},
+];
+const DEFAULT_GERENCIAS = [
+  {nombre:'Gerencia General', dependeDe:'Directorio'},
+  {nombre:'Gerencia División Administrativa Financiera', dependeDe:'Gerencia General'},
+  {nombre:'Gerencia División Relaciones Ganaderas', dependeDe:'Gerencia General'},
+  {nombre:'Gerencia División Operaciones', dependeDe:'Gerencia General'},
+  {nombre:'Gerencia División Comercial', dependeDe:'Gerencia General'},
+  {nombre:'Gerencia División Cadena de Suministros', dependeDe:'Gerencia General'},
+  {nombre:'Gerencia Planificación y Finanzas', dependeDe:'Gerencia División Administrativa Financiera'},
+  {nombre:'Gerencia de Tecnología de la Información', dependeDe:'Gerencia División Administrativa Financiera'},
+  {nombre:'Gerencia de Talento Humano', dependeDe:'Gerencia División Administrativa Financiera'},
+  {nombre:'Gerencia de Contabilidad', dependeDe:'Gerencia División Administrativa Financiera'},
+];
+const ESTADOS_OBJ = {borrador:'Borrador', propuesto:'Propuesto', aprobado:'Aprobado'};
+const ESTADOS_CIERRE = {abierta:'Abierta', enviada:'Enviada a GTH', calibrada:'Calibrada'};
+const HITO_EST = {pendiente:'Pendiente', cumplido:'Cumplido', no_cumplido:'No cumplido'};
+
+// ====================== Utilidades ======================
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slug = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60);
+const isNum = v => v !== null && v !== '' && v !== undefined && !isNaN(Number(v));
+const N = v => isNum(v) ? Number(v) : null;
+const round = (v,d=1) => v===null||v===undefined ? null : Math.round(v*10**d)/10**d;
+const fmt = (v,u='') => {
+  if(!isNum(v)) return '—';
+  const s = Number(v).toLocaleString('es-BO',{maximumFractionDigits:2});
+  if(!u) return s; if(u==='%') return s+'%'; return s+' '+u;
+};
+const today = () => new Date().toISOString().slice(0,10);
+const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; $('#toastRoot').appendChild(t); setTimeout(()=>t.remove(),2600); }
+function userName(){ try{ return localStorage.getItem('frigor-user') || ''; }catch(e){ return ''; } }
+
+// ====================== Cálculo ======================
+// Bandas del trimestre: la meta del trimestre es la meta acumulada a esa fecha;
+// el umbral y el sobresaliente conservan la misma distancia que tienen en la meta anual.
+function bandsFor(o, q){
+  const k = o.kpi || {};
+  const meta = N(k.metaAnual), um = N(k.umbral), so = N(k.sobresaliente);
+  const mq = N((k.metasQ||{})[q]);
+  const target = mq !== null ? mq : (q==='T4' ? meta : null);
+  if(target === null) return null;
+  return {
+    umbral: um !== null && meta !== null ? round(target - (meta-um), 4) : target,
+    meta: target,
+    sobresaliente: so !== null && meta !== null ? round(target + (so-meta), 4) : target,
+  };
+}
+function curveScore(real, b, sentido){
+  if(!isNum(real) || !b) return null;
+  const s = sentido === 'menor' ? -1 : 1;
+  const r = s*Number(real), u = s*b.umbral, m = s*b.meta, x = s*b.sobresaliente;
+  const uu = u > m ? m : u;
+  if(r < uu) return 0;
+  if(r < m) return uu === m ? 100 : 50 + 50*(r-uu)/(m-uu);
+  if(x <= m) return 100;
+  if(r >= x) return 120;
+  return 100 + 20*(r-m)/(x-m);
+}
+function hitosScore(o, q, ev){
+  const hs = o.hitos || [];
+  const qi = QS.indexOf(q);
+  const due = hs.filter(h => QS.indexOf(h.trimestre) <= qi);
+  const dueW = due.reduce((a,h)=>a+(N(h.peso)||0),0);
+  if(!due.length || dueW <= 0) return null;
+  const st = (ev && ev.hitos) || {};
+  const done = due.filter(h => st[h.id] === 'cumplido').reduce((a,h)=>a+(N(h.peso)||0),0);
+  return 100*done/dueW;
+}
+function evalOf(o, q){ return S.evaluaciones[evId(o.id, q)] || null; }
+function evId(oid, q){ return oid + '__' + q; }
+function rawScore(o, q){
+  const ev = evalOf(o, q);
+  if(o.tipo === 'hitos'){
+    // el estado de cada hito se arrastra de trimestres anteriores
+    const prev = QS.slice(0, QS.indexOf(q)+1).map(x=>evalOf(o,x)).filter(Boolean);
+    if(!prev.length) return null;
+    const st = Object.assign({}, ...prev.map(e=>e.hitos||{}));
+    return hitosScore(o, q, {hitos:st});
+  }
+  if(!ev || !isNum(ev.real)) return null;
+  return curveScore(ev.real, bandsFor(o, q), (o.kpi||{}).sentido);
+}
+function finalScore(o, q){
+  const s = rawScore(o, q);
+  if(s === null) return null;
+  const ev = evalOf(o, q);
+  const adj = ev && isNum(ev.ajuste) ? Number(ev.ajuste) : 0;
+  return Math.max(0, Math.min(120, s + adj));
+}
+function ratingOf(score){ if(score===null||score===undefined) return null; return RATINGS.find(r => score >= r.min); }
+function ratingChip(score){
+  const r = ratingOf(score);
+  if(!r) return '<span class="chip">Sin dato</span>';
+  return `<span class="rating r${r.n}">${r.n} · ${esc(r.nombre)}</span>`;
+}
+function scorecardResult(objs, q){
+  let wSum=0, wEval=0, acc=0;
+  objs.forEach(o=>{
+    const w = N(o.peso)||0; wSum += w;
+    const s = finalScore(o, q);
+    if(s !== null){ wEval += w; acc += w*s; }
+  });
+  return {score: wEval>0 ? acc/wEval : null, cobertura: wSum>0 ? 100*wEval/wSum : 0, pesoTotal:wSum};
+}
+// Objetivos de un hito que vencen en un trimestre posterior no tienen meta todavía
+function hasTargetIn(o, q){
+  if(o.tipo === 'hitos'){ const qi=QS.indexOf(q); return (o.hitos||[]).some(h=>QS.indexOf(h.trimestre)<=qi); }
+  return !!bandsFor(o, q);
+}
+
+// ====================== Composición del enunciado ======================
+function statement(o){
+  if(o.tipo === 'hitos'){
+    const n = (o.hitos||[]).length;
+    return `${o.titulo || 'Proyecto sin nombre'} — ${n} hito${n===1?'':'s'} verificable${n===1?'':'s'}${o.fechaFin?' al '+o.fechaFin:''}.`;
+  }
+  const k = o.kpi || {};
+  const verbo = k.sentido === 'menor' ? 'Reducir' : 'Incrementar';
+  const ind = k.indicador || o.titulo || 'indicador por definir';
+  const base = isNum(k.lineaBase) ? ` de ${fmt(k.lineaBase,k.unidad)}` : '';
+  const meta = isNum(k.metaAnual) ? ` a ${fmt(k.metaAnual,k.unidad)}` : '';
+  return `${verbo} ${ind}${base}${meta} al 31/12/${o.anio}${k.fuente ? ', medido con '+k.fuente : ''}.`;
+}
+
+// ====================== Validación (avisa, no bloquea) ======================
+function objIssues(o){
+  const out = [];
+  if(!o.pilar) out.push(['bad','Sin pilar estratégico']);
+  if(!isNum(o.peso) || Number(o.peso) <= 0) out.push(['bad','Sin peso']);
+  else if(Number(o.peso) < 10) out.push(['warn','Peso menor a 10%: diluye el foco']);
+  else if(Number(o.peso) > 40) out.push(['warn','Peso mayor a 40%: concentra demasiado riesgo']);
+  if(o.tipo === 'hitos'){
+    const hs = o.hitos||[];
+    if(hs.length < 2) out.push(['warn','Un proyecto necesita al menos 2 hitos verificables']);
+    const sw = hs.reduce((a,h)=>a+(N(h.peso)||0),0);
+    if(hs.length && Math.round(sw) !== 100) out.push(['bad',`Los hitos suman ${round(sw)}%, deben sumar 100%`]);
+    if(hs.some(h=>!h.evidencia)) out.push(['warn','Hay hitos sin evidencia de cumplimiento']);
+  } else {
+    const k = o.kpi||{};
+    if(!k.indicador) out.push(['bad','Sin indicador']);
+    if(!isNum(k.metaAnual)) out.push(['bad','Sin meta anual']);
+    if(!isNum(k.lineaBase)) out.push(['warn','Sin línea base']);
+    if(!isNum(k.umbral) || !isNum(k.sobresaliente)) out.push(['warn','Faltan umbral o sobresaliente']);
+    else if(isNum(k.metaAnual)){
+      const s = k.sentido==='menor' ? -1 : 1;
+      if(s*k.umbral > s*k.metaAnual) out.push(['bad','El umbral está del lado equivocado de la meta']);
+      if(s*k.sobresaliente < s*k.metaAnual) out.push(['bad','El sobresaliente está del lado equivocado de la meta']);
+    }
+    const ev = ANIOS[o.anio] ? ANIOS[o.anio].evalua : QS;
+    const miss = ev.filter(q=>!isNum((k.metasQ||{})[q]) && q!=='T4');
+    if(miss.length) out.push(['warn','Falta meta acumulada de '+miss.join(', ')]);
+    if(!k.fuente) out.push(['warn','Sin fuente de verificación']);
+    if(/\b(implementar|capacitar|ejecutar|elaborar|realizar|desarrollar|avance)\b/i.test((k.indicador||'')))
+      out.push(['info','Parece una actividad o proyecto: considera el tipo "Proyecto con hitos"']);
+  }
+  if(/PLACEHOLDER|por validar|por confirmar/i.test(o.sustento||'')) out.push(['warn','Línea base o meta marcadas como dato por validar']);
+  return out;
+}
+function scorecardIssues(objs){
+  const out = [];
+  if(!objs.length) return [['info','Esta gerencia aún no tiene objetivos para el año.']];
+  const w = objs.reduce((a,o)=>a+(N(o.peso)||0),0);
+  if(Math.round(w) !== 100) out.push(['bad',`Los pesos suman ${round(w)}%. Deben sumar 100%.`]);
+  if(objs.length < 3) out.push(['warn',`${objs.length} objetivo(s). Se recomiendan entre 3 y 7.`]);
+  if(objs.length > 7) out.push(['warn',`${objs.length} objetivos. Más de 7 diluye el foco.`]);
+  const wh = objs.filter(o=>o.tipo==='hitos').reduce((a,o)=>a+(N(o.peso)||0),0);
+  if(w>0 && wh/w > 0.4) out.push(['warn',`Proyectos con hitos pesan ${round(100*wh/w)}%. Máximo recomendado: 40%.`]);
+  objs.forEach(o=>objIssues(o).filter(i=>i[0]!=='info').forEach(i=>out.push([i[0], `<b>${esc(shortName(o))}:</b> ${esc(i[1])}`])));
+  if(!out.length) out.push(['ok','El scorecard cumple todas las reglas.']);
+  return out;
+}
+function shortName(o){ const t = o.titulo || (o.kpi||{}).indicador; return (t||'Objetivo').length>70 ? t.slice(0,68)+'…' : (t||'Objetivo'); }
+
+// ====================== Almacenamiento ======================
+const S = {objetivos:{}, evaluaciones:{}, cierres:{}, gerencias:DEFAULT_GERENCIAS.slice(), bitacora:[]};
+let DB = null, DL = null, MODE = 'pending';
+const LOCAL_KEY = 'frigor-objetivos-v4';
+function saveLocal(){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify({objetivos:S.objetivos, evaluaciones:S.evaluaciones, cierres:S.cierres, gerencias:S.gerencias, bitacora:S.bitacora})); }catch(e){} }
+function loadLocal(){ try{ const raw = localStorage.getItem(LOCAL_KEY); if(!raw) return; const d = JSON.parse(raw); Object.assign(S, {objetivos:d.objetivos||{}, evaluaciones:d.evaluaciones||{}, cierres:d.cierres||{}, gerencias:d.gerencias||S.gerencias, bitacora:d.bitacora||[]}); }catch(e){} }
+
+async function api(method, url, body){
+  const r = await fetch(url, {method, headers:{'Content-Type':'application/json'}, body: body===undefined?undefined:JSON.stringify(body)});
+  if(!r.ok) throw {code: r.status===401?'invalid_argument':'unavailable'};
+  return r.json();
+}
+async function put(col, id, data){
+  S[col][id] = data;
+  if(MODE === 'server'){ try{ await api('PUT', `api/${col}/${encodeURIComponent(id)}`, data); }catch(e){ handleWriteError(e); throw e; } }
+  else if(MODE === 'shared'){
+    try{ await DB.collection(col).doc(id).set(data); }
+    catch(e){ handleWriteError(e); throw e; }
+  } else saveLocal();
+}
+async function del(col, id){
+  delete S[col][id];
+  if(MODE === 'server'){ try{ await api('DELETE', `api/${col}/${encodeURIComponent(id)}`); }catch(e){ handleWriteError(e); throw e; } }
+  else if(MODE === 'shared'){ try{ await DB.collection(col).doc(id).delete(); }catch(e){ handleWriteError(e); throw e; } }
+  else saveLocal();
+}
+function handleWriteError(e){
+  const code = e && e.code;
+  if(code === 'invalid_argument') toast('No tienes permiso de edición en este documento compartido.');
+  else if(code === 'quota_exceeded') toast('Se llenó el espacio de datos del artefacto. Elimina registros antiguos.');
+  else toast('No se pudo guardar. Intenta de nuevo en unos segundos.');
+}
+async function saveGerencias(){
+  if(MODE === 'server'){ try{ await api('PUT', 'api/config/gerencias', {lista:S.gerencias}); }catch(e){ handleWriteError(e); } }
+  else if(MODE === 'shared'){ try{ await DB.doc('config/gerencias').set({lista:S.gerencias}); }catch(e){ handleWriteError(e); } }
+  else saveLocal();
+}
+async function logMove(accion, detalle){
+  const entry = {f:new Date().toISOString(), quien:userName()||'Sin nombre', accion, detalle};
+  if(MODE === 'server'){ try{ await api('POST', 'api/bitacora', entry); S.bitacora.push(entry); }catch(e){} }
+  else if(MODE === 'shared'){
+    const mes = entry.f.slice(0,7);
+    const ref = DB.doc('bitacora/'+mes);
+    try{
+      const snap = await ref.get();
+      const items = snap.exists ? (snap.data().items||[]).slice(-1500) : [];
+      await ref.set({items:[...items, entry]});
+    }catch(e){ /* la bitácora no bloquea el trabajo */ }
+  } else { S.bitacora.push(entry); S.bitacora = S.bitacora.slice(-2000); saveLocal(); }
+}
+
+let renderQueued = false;
+function scheduleRender(){ if(renderQueued) return; renderQueued = true; requestAnimationFrame(()=>{ renderQueued=false; renderAll(); }); }
+
+// Servidor propio (Railway): estado completo por GET y refresco periódico
+function applyServerState(d){
+  ['objetivos','evaluaciones','cierres'].forEach(col=>{
+    // no pisar evaluaciones con escritura pendiente en este navegador
+    const pend = col==='evaluaciones' ? Object.keys(evTimers).filter(k=>evTimers[k]) : [];
+    const m = Object.assign({}, d[col]||{}); pend.forEach(k=>{ if(S.evaluaciones[k]) m[k] = S.evaluaciones[k]; });
+    S[col] = m;
+  });
+  const g = d.config && d.config.gerencias; if(g && Array.isArray(g.lista)) S.gerencias = g.lista.slice();
+  S.bitacora = d.bitacora || [];
+}
+async function tryServer(){
+  if(!/^https?:$/.test(location.protocol) || window.claude) return false;
+  try{
+    const h = await fetch('api/health', {cache:'no-store'}); if(!h.ok) return false;
+    const st = await fetch('api/state', {cache:'no-store'}); if(!st.ok) return false;
+    applyServerState(await st.json());
+  }catch(e){ return false; }
+  MODE = 'server';
+  setInterval(async ()=>{
+    if(document.hidden) return;
+    try{ const r = await fetch('api/state', {cache:'no-store'}); if(r.ok){ applyServerState(await r.json()); scheduleRender(); } }catch(e){}
+  }, 20000);
+  return true;
+}
+async function connect(){
+  if(await tryServer()){ renderAll(); return; }
+  let api = null;
+  try{ if(window.claude && typeof window.claude.use === 'function') api = await window.claude.use('db'); }catch(e){ api = null; }
+  try{ if(window.claude && typeof window.claude.use === 'function') DL = await window.claude.use('downloads'); }catch(e){ DL = null; }
+  if(api){
+    DB = api; MODE = 'shared';
+    S.objetivos = {}; S.evaluaciones = {}; S.cierres = {};
+    ['objetivos','evaluaciones','cierres'].forEach(col=>{
+      DB.collection(col).onSnapshot(snap=>{
+        const m = {}; snap.docs.forEach(d=>{ m[d.id] = d.data(); }); S[col] = m; scheduleRender();
+      }, err=>{ console.warn(col, err); });
+    });
+    DB.doc('config/gerencias').onSnapshot(d=>{ if(d.exists && Array.isArray(d.data().lista)) { S.gerencias = d.data().lista.slice(); scheduleRender(); } });
+    DB.collection('bitacora').onSnapshot(snap=>{
+      let all = []; snap.docs.forEach(d=>{ all = all.concat(d.data().items||[]); });
+      S.bitacora = all.sort((a,b)=>a.f<b.f?-1:1); scheduleRender();
+    });
+  } else {
+    MODE = 'local'; loadLocal();
+  }
+  renderAll();
+}
+
+// ====================== Contexto y navegación ======================
+const UI = {view:'inicio', year:2026, ger:'', q:null, coQ:null, showAll:false, calib:false};
+try{ const p = JSON.parse(localStorage.getItem('frigor-ui')||'{}'); if(p.year) UI.year = p.year; if(p.ger) UI.ger = p.ger; }catch(e){}
+function saveUI(){ try{ localStorage.setItem('frigor-ui', JSON.stringify({year:UI.year, ger:UI.ger})); }catch(e){} }
+function years(){ const ys = new Set(Object.keys(ANIOS).map(Number)); Object.values(S.objetivos).forEach(o=>o.anio&&ys.add(Number(o.anio))); return [...ys].sort(); }
+function currentQ(year){
+  const ev = (ANIOS[year]||{}).evalua || QS;
+  // el trimestre a evaluar es el último cerrado del año en curso
+  const d = new Date(); const y = d.getFullYear(); const m = d.getMonth()+1;
+  if(year < y) return ev[ev.length-1];
+  if(year > y) return ev[0];
+  const lastClosed = m<=3 ? null : m<=6 ? 'T1' : m<=9 ? 'T2' : 'T3';
+  return lastClosed && ev.includes(lastClosed) ? lastClosed : ev[0];
+}
+function objsOf(year, ger){ return Object.values(S.objetivos).filter(o=>Number(o.anio)===Number(year) && (!ger || o.gerencia===ger)).sort((a,b)=>(a.orden||0)-(b.orden||0) || (N(b.peso)||0)-(N(a.peso)||0)); }
+function gerNames(){ return S.gerencias.map(g=>g.nombre); }
+
+function renderCtx(){
+  const ys = years();
+  $('#ctxYear').innerHTML = ys.map(y=>`<option value="${y}" ${y===UI.year?'selected':''}>${y}</option>`).join('');
+  if(!UI.ger || !gerNames().includes(UI.ger)) UI.ger = gerNames()[0] || '';
+  $('#ctxGer').innerHTML = S.gerencias.map(g=>`<option ${g.nombre===UI.ger?'selected':''}>${esc(g.nombre)}</option>`).join('');
+  const b = $('#storeBadge');
+  if(MODE==='server'){ b.className='store-badge shared'; b.textContent='Datos compartidos'; b.title='Guardado en el servidor de FRIGOR. Se actualiza cada 20 segundos.'; }
+  else if(MODE==='shared'){ b.className='store-badge shared'; b.textContent='Datos compartidos'; b.title='Todos los que abren este enlace ven y editan los mismos datos.'; }
+  else if(MODE==='local'){ b.className='store-badge local'; b.textContent='Solo este navegador'; b.title='Sin conexión a la base compartida. Usa Datos → Respaldo para mover la información.'; }
+}
+$('#ctxYear').addEventListener('change', e=>{ UI.year = Number(e.target.value); UI.q = null; UI.coQ=null; saveUI(); renderAll(); });
+$('#ctxGer').addEventListener('change', e=>{ UI.ger = e.target.value; saveUI(); renderAll(); });
+$('#tabs').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-view]'); if(!b) return;
+  UI.view = b.dataset.view;
+  document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-selected', String(x===b)));
+  document.querySelectorAll('section.view').forEach(s=>s.hidden = s.id !== 'v-'+UI.view);
+  try{ history.replaceState(null,'','#'+UI.view); }catch(err){}
+  renderAll();
+});
+(function initHash(){ const h = (location.hash||'').slice(1); if(h && document.getElementById('v-'+h)){ UI.view=h; document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-selected', String(x.dataset.view===h))); document.querySelectorAll('section.view').forEach(s=>s.hidden = s.id !== 'v-'+h); } })();
+
+// ====================== Vista: Inicio ======================
+function renderInicio(){
+  const y = UI.year, q = currentQ(y);
+  const objs = objsOf(y);
+  const gers = gerNames();
+  const conObj = gers.filter(g=>objsOf(y,g).length);
+  const cierresQ = gers.map(g=>S.cierres[slug(g)+'__'+y+'-'+q]).filter(Boolean);
+  const enviadas = cierresQ.filter(c=>c.estado!=='abierta').length;
+  const objsNext = objsOf(y+1);
+  const aprob = objsNext.filter(o=>o.estado==='aprobado').length;
+  const res = conObj.map(g=>scorecardResult(objsOf(y,g), q).score).filter(s=>s!==null);
+  const prom = res.length ? res.reduce((a,b)=>a+b,0)/res.length : null;
+  $('#homeTiles').innerHTML = `
+    <div class="tile"><span class="label">Objetivos ${y}</span><span class="big num">${objs.length}</span><span class="small muted">${conObj.length} de ${gers.length} gerencias con scorecard</span></div>
+    <div class="tile"><span class="label">Evaluación ${q} ${y}</span><span class="big num">${enviadas}/${conObj.length}</span><span class="small muted">gerencias enviadas o calibradas</span></div>
+    <div class="tile"><span class="label">Promedio ${q} ${y}</span><span class="big num">${prom===null?'—':round(prom)}</span><span class="small">${prom===null?'<span class="muted">sin resultados cargados</span>':ratingChip(prom)}</span></div>
+    <div class="tile"><span class="label">Objetivos ${y+1}</span><span class="big num">${objsNext.length}</span><span class="small muted">${aprob} aprobados · ${objsNext.length-aprob} en construcción</span></div>`;
+  const t = today();
+  $('#homeTimeline').innerHTML = CALENDARIO.map(c=>{
+    const cls = c.h < t ? 'done' : (c.f <= t ? 'now' : '');
+    const d = s => s.split('-').reverse().slice(0,2).join('/');
+    return `<div class="tl-item ${cls}"><div class="when">${d(c.f)} – ${d(c.h)}/${c.h.slice(0,4)}${cls==='now'?' · <b style="color:var(--accent)">en curso</b>':''}</div><div>${esc(c.t)}</div></div>`;
+  }).join('');
+  const all = [];
+  gers.forEach(g=>{ const os = objsOf(y,g); if(!os.length) return; scorecardIssues(os).filter(i=>i[0]==='bad').forEach(i=>all.push(['bad', `<b>${esc(g)}</b> · ${i[1]}`])); });
+  $('#homeAlertsScope').textContent = `Errores que impiden evaluar ${y}`;
+  $('#homeAlerts').innerHTML = (all.length ? all.slice(0,40) : [['ok','Sin errores bloqueantes en los scorecards de '+y+'.']]).map(i=>`<li class="${i[0]}">${i[1]}</li>`).join('') + (all.length>40?`<li>… y ${all.length-40} más</li>`:'');
+}
+
+// ====================== Vista: Objetivos ======================
+function renderObjetivos(){
+  const y = UI.year;
+  const objs = UI.showAll ? objsOf(y) : objsOf(y, UI.ger);
+  $('#scTitle').textContent = UI.showAll ? `Todos los scorecards ${y}` : `Scorecard ${y} · ${UI.ger}`;
+  const w = objs.reduce((a,o)=>a+(N(o.peso)||0),0);
+  $('#scSub').innerHTML = `${objs.length} objetivo(s) · peso total <span class="num">${round(w)}%</span>${ANIOS[y]?' · '+esc(ANIOS[y].nota):''}`;
+  if(!objs.length){
+    $('#scTable').innerHTML = `<tbody><tr><td class="empty">No hay objetivos para ${esc(UI.showAll?'este año':UI.ger)} en ${y}. Usa “+ Nuevo objetivo” o importa un respaldo en Datos.</td></tr></tbody>`;
+  } else {
+    $('#scTable').innerHTML = `<thead><tr>${UI.showAll?'<th>Gerencia</th>':''}<th>Pilar</th><th>Objetivo</th><th>Tipo</th><th class="r">Peso</th><th class="r">Base</th><th class="r">Umbral</th><th class="r">Meta</th><th class="r">Sobresal.</th><th>Estado</th><th>Revisar</th></tr></thead><tbody>${
+      objs.map(o=>{
+        const k = o.kpi||{}; const iss = objIssues(o).filter(i=>i[0]!=='info');
+        const bad = iss.filter(i=>i[0]==='bad').length;
+        const kp = o.tipo!=='hitos';
+        return `<tr class="clickable" data-oid="${esc(o.id)}">${UI.showAll?`<td class="small">${esc(o.gerencia)}</td>`:''}
+          <td><span class="pilar ${esc(o.pilar)}" title="${esc((PILARES[o.pilar]||{}).nombre||'')}">${esc((PILARES[o.pilar]||{}).corto||'—')}</span></td>
+          <td style="min-width:260px"><div>${esc(shortName(o))}</div><div class="small muted">${esc(statement(o))}</div></td>
+          <td class="small">${kp?'Indicador':'Proyecto · '+(o.hitos||[]).length+' hitos'}</td>
+          <td class="r num">${isNum(o.peso)?round(o.peso)+'%':'—'}</td>
+          <td class="r num">${kp?fmt(k.lineaBase,k.unidad):'—'}</td>
+          <td class="r num">${kp?fmt(k.umbral,k.unidad):'—'}</td>
+          <td class="r num"><b>${kp?fmt(k.metaAnual,k.unidad):'100% hitos'}</b></td>
+          <td class="r num">${kp?fmt(k.sobresaliente,k.unidad):'—'}</td>
+          <td><span class="chip ${o.estado==='aprobado'?'ok':o.estado==='propuesto'?'acc':''}">${ESTADOS_OBJ[o.estado]||'Borrador'}</span></td>
+          <td>${iss.length?`<span class="chip ${bad?'bad':'warn'}">${iss.length} aviso${iss.length>1?'s':''}</span>`:'<span class="chip ok">OK</span>'}</td></tr>`;
+      }).join('')}</tbody><tfoot><tr>${UI.showAll?'<td></td>':''}<td></td><td>Total</td><td></td><td class="r num">${round(w)}%</td><td colspan="6"></td></tr></tfoot>`;
+  }
+  const scope = UI.showAll ? [] : scorecardIssues(objs);
+  $('#scAlerts').innerHTML = UI.showAll ? '<li>Elige una gerencia para validar su scorecard.</li>' : scope.map(i=>`<li class="${i[0]}">${i[1]}</li>`).join('');
+  const pw = {}; Object.keys(PILARES).forEach(p=>pw[p]=0); objs.forEach(o=>{ if(pw[o.pilar]!==undefined) pw[o.pilar]+= N(o.peso)||0; });
+  const tot = Object.values(pw).reduce((a,b)=>a+b,0) || 1;
+  $('#scPilares').innerHTML = Object.keys(PILARES).map(p=>`
+    <div style="display:grid;grid-template-columns:110px 1fr 48px;gap:10px;align-items:center;margin-bottom:8px">
+      <span class="pilar ${p}">${PILARES[p].corto}</span>
+      <div style="height:10px;background:var(--surface-2);border-radius:5px;overflow:hidden"><div style="height:100%;width:${100*pw[p]/tot}%;background:var(--p-${p.toLowerCase()})"></div></div>
+      <span class="num small r" style="text-align:right">${round(100*pw[p]/tot)}%</span></div>`).join('') + '<p class="small muted">No se exige cubrir los cuatro pilares en cada gerencia; sí en el scorecard corporativo.</p>';
+}
+$('#scTable').addEventListener('click', e=>{ const tr = e.target.closest('tr[data-oid]'); if(tr) openEditor(tr.dataset.oid); });
+$('#scShowAll').addEventListener('change', e=>{ UI.showAll = e.target.checked; renderObjetivos(); });
+$('#btnNewObj').addEventListener('click', ()=>openEditor(null));
+
+// ====================== Editor de objetivo ======================
+let ED = null; // copia de trabajo
+function blankObj(){
+  return {id:newId('ob'), anio:UI.year, gerencia:UI.ger, pilar:'', titulo:'', responsable:'', peso:'', tipo:'kpi', estado:'borrador', sustento:'',
+    kpi:{indicador:'', formula:'', unidad:'%', sentido:'mayor', lineaBase:'', umbral:'', metaAnual:'', sobresaliente:'', metasQ:{}, fuente:'', responsableDato:''},
+    hitos:[], fechaFin:''};
+}
+function openEditor(oid){
+  const src = oid ? S.objetivos[oid] : blankObj();
+  if(!src) return;
+  ED = JSON.parse(JSON.stringify(src));
+  ED.kpi = Object.assign(blankObj().kpi, ED.kpi||{}); ED.kpi.metasQ = ED.kpi.metasQ || {};
+  ED.hitos = ED.hitos || [];
+  ED._isNew = !oid;
+  renderEditor();
+}
+function closeEditor(){ ED = null; $('#drawerRoot').innerHTML = ''; }
+function renderEditor(){
+  const o = ED, k = o.kpi;
+  const evQs = (ANIOS[o.anio]||{}).evalua || QS;
+  const kp = o.tipo !== 'hitos';
+  $('#drawerRoot').innerHTML = `
+  <div class="drawer-bg" id="edBg"><div class="drawer" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+    <div class="drawer-head"><h2 id="edTitle" style="flex:1">${o._isNew?'Nuevo objetivo':'Editar objetivo'}</h2><button class="btn ghost" id="edClose" aria-label="Cerrar">Cerrar ✕</button></div>
+    <div class="drawer-body">
+      <div class="statement" id="edStatement">${esc(statement(o))}</div>
+      <fieldset><legend>Qué y para qué</legend>
+        <div class="grid g2">
+          <label class="field"><span>Gerencia</span><select id="ed-gerencia">${S.gerencias.map(g=>`<option ${g.nombre===o.gerencia?'selected':''}>${esc(g.nombre)}</option>`).join('')}</select></label>
+          <label class="field"><span>Año</span><select id="ed-anio">${[...new Set([...years(), Number(o.anio), UI.year+1])].sort().map(y=>`<option ${Number(y)===Number(o.anio)?'selected':''}>${y}</option>`).join('')}</select></label>
+          <label class="field"><span>Pilar estratégico</span><select id="ed-pilar"><option value="">Selecciona…</option>${Object.entries(PILARES).map(([c,p])=>`<option value="${c}" ${o.pilar===c?'selected':''}>${p.corto} — ${p.nombre}</option>`).join('')}</select></label>
+          <label class="field"><span>Responsable (ejecutivo evaluado)</span><input id="ed-responsable" value="${esc(o.responsable)}" placeholder="Nombre y cargo"></label>
+        </div>
+        <label class="field"><span>Objetivo</span><input id="ed-titulo" value="${esc(o.titulo)}" placeholder="Redáctalo como lo dirías al comité: qué resultado y para qué"><small>Texto libre. No hay palabras prohibidas; la medición va abajo.</small></label>
+        <div class="grid g3">
+          <label class="field"><span>Peso en el scorecard (%)</span><input type="number" id="ed-peso" min="0" max="100" step="1" value="${esc(o.peso)}"></label>
+          <label class="field"><span>Estado</span><select id="ed-estado">${Object.entries(ESTADOS_OBJ).map(([v,t])=>`<option value="${v}" ${o.estado===v?'selected':''}>${t}</option>`).join('')}</select></label>
+          <div class="field"><span>Tipo de medición</span><div class="seg" id="ed-tipo"><button type="button" data-t="kpi" aria-pressed="${kp}">Indicador</button><button type="button" data-t="hitos" aria-pressed="${!kp}">Proyecto con hitos</button></div></div>
+        </div>
+      </fieldset>
+      ${kp ? `
+      <fieldset><legend>Cómo se mide</legend>
+        <div class="grid g2">
+          <label class="field"><span>Indicador</span><input id="k-indicador" value="${esc(k.indicador)}" placeholder="p. ej. OTIF a clientes nacionales"></label>
+          <label class="field"><span>Fórmula o definición</span><input id="k-formula" value="${esc(k.formula)}" placeholder="p. ej. pedidos a tiempo y completos / pedidos totales"></label>
+        </div>
+        <div class="grid g4">
+          <label class="field"><span>Unidad</span><input id="k-unidad" value="${esc(k.unidad)}" placeholder="%, días, USD/kg"></label>
+          <label class="field"><span>Mejor es</span><select id="k-sentido"><option value="mayor" ${k.sentido!=='menor'?'selected':''}>Mayor</option><option value="menor" ${k.sentido==='menor'?'selected':''}>Menor</option></select></label>
+          <label class="field"><span>Línea base (real)</span><input type="number" step="any" id="k-lineaBase" value="${esc(k.lineaBase)}"></label>
+          <label class="field"><span>Responsable del dato</span><input id="k-responsableDato" value="${esc(k.responsableDato)}" placeholder="Área que certifica"></label>
+        </div>
+        <div class="grid g4">
+          <label class="field"><span>Umbral (50 pts)</span><input type="number" step="any" id="k-umbral" value="${esc(k.umbral)}"></label>
+          <label class="field"><span>Meta anual (100 pts)</span><input type="number" step="any" id="k-metaAnual" value="${esc(k.metaAnual)}"></label>
+          <label class="field"><span>Sobresaliente (120 pts)</span><input type="number" step="any" id="k-sobresaliente" value="${esc(k.sobresaliente)}"></label>
+          <div class="field"><span>&nbsp;</span><button type="button" class="btn" id="btnSuggestBands" title="Umbral a 30% de la brecha bajo la meta; sobresaliente a 20% sobre la meta">Sugerir umbral/sobresal.</button></div>
+        </div>
+        <div>
+          <div class="row" style="justify-content:space-between;margin-bottom:6px"><span class="label">Meta acumulada al cierre de cada trimestre</span>
+            <span class="row"><button type="button" class="btn ghost" id="btnQLinear">Repartir desde la línea base</button><button type="button" class="btn ghost" id="btnQFlat">Igual a la meta anual</button></span></div>
+          <div class="grid g4">${QS.map(q=>`<label class="field"><span>${q}${evQs.includes(q)?'':' (no se evalúa)'}</span><input type="number" step="any" id="q-${q}" value="${esc(k.metasQ[q])}"></label>`).join('')}</div>
+          <small class="muted">Para tasas y % de cumplimiento de presupuesto usa el valor acumulado al cierre del trimestre. Ajusta por estacionalidad: el reparto lineal es solo un punto de partida.</small>
+        </div>
+        <label class="field"><span>Fuente de verificación</span><input id="k-fuente" value="${esc(k.fuente)}" placeholder="Reporte o sistema que ya existe (SAP, SALAR, estado de resultados…)"></label>
+      </fieldset>` : `
+      <fieldset><legend>Hitos del proyecto</legend>
+        <p class="small muted">3 a 6 entregables verificables. Cada uno con el trimestre en que debe estar terminado y su peso (suman 100%). En la evaluación se marcan como cumplidos o no; no se declara un % de avance.</p>
+        <div class="hito-row label"><span>Hito</span><span>Evidencia de cumplimiento</span><span>Trimestre</span><span>Peso %</span><span></span></div>
+        <div id="hitosList" style="display:flex;flex-direction:column;gap:6px">${o.hitos.map((h,i)=>`
+          <div class="hito-row" data-i="${i}">
+            <input data-h="nombre" value="${esc(h.nombre)}" placeholder="p. ej. Obra civil terminada">
+            <input data-h="evidencia" value="${esc(h.evidencia)}" placeholder="Acta de recepción firmada">
+            <select data-h="trimestre">${QS.map(q=>`<option ${h.trimestre===q?'selected':''}>${q}</option>`).join('')}</select>
+            <input data-h="peso" type="number" min="0" max="100" value="${esc(h.peso)}">
+            <button type="button" class="btn ghost hito-del" data-del="${i}" aria-label="Quitar hito">✕</button>
+          </div>`).join('')}</div>
+        <div class="row"><button type="button" class="btn" id="btnAddHito">+ Agregar hito</button><span class="small muted" id="hitosSum"></span></div>
+        <label class="field"><span>Fecha de término del proyecto</span><input id="ed-fechaFin" value="${esc(o.fechaFin)}" placeholder="dd/mm/aaaa"></label>
+      </fieldset>`}
+      <fieldset><legend>Sustento</legend>
+        <label class="field"><span>Por qué la meta es exigente y alcanzable</span><textarea id="ed-sustento" placeholder="Histórico, presupuesto aprobado, benchmark, capacidad instalada">${esc(o.sustento)}</textarea></label>
+      </fieldset>
+      <div class="panel"><div class="label" style="margin-bottom:6px">Revisión</div><ul class="alerts" id="edIssues"></ul></div>
+      <div id="edConfirm"></div>
+    </div>
+    <div class="drawer-foot">
+      ${o._isNew?'':'<button class="btn danger" id="edDelete" style="margin-right:auto">Eliminar</button><button class="btn" id="edDup">Duplicar para el año siguiente</button>'}
+      <button class="btn" id="edCancel">Cancelar</button>
+      <button class="btn primary" id="edSave">Guardar</button>
+    </div>
+  </div></div>`;
+  bindEditor(); refreshEditorLive();
+}
+function readEditor(){
+  const o = ED; const v = id => { const el = document.getElementById(id); return el ? el.value : undefined; };
+  o.gerencia = v('ed-gerencia'); o.anio = Number(v('ed-anio')); o.pilar = v('ed-pilar'); o.responsable = v('ed-responsable').trim();
+  o.titulo = v('ed-titulo').trim(); o.peso = v('ed-peso')===''?'':Number(v('ed-peso')); o.estado = v('ed-estado'); o.sustento = v('ed-sustento');
+  if(o.tipo !== 'hitos'){
+    const k = o.kpi;
+    ['indicador','formula','unidad','sentido','fuente','responsableDato'].forEach(f=>k[f] = (v('k-'+f)||'').trim());
+    ['lineaBase','umbral','metaAnual','sobresaliente'].forEach(f=>{ const x=v('k-'+f); k[f] = x===''?'':Number(x); });
+    QS.forEach(q=>{ const x = v('q-'+q); if(x===''||x===undefined) delete k.metasQ[q]; else k.metasQ[q] = Number(x); });
+  } else {
+    document.querySelectorAll('#hitosList .hito-row').forEach(row=>{
+      const h = o.hitos[Number(row.dataset.i)]; if(!h) return;
+      row.querySelectorAll('[data-h]').forEach(el=>{ h[el.dataset.h] = el.dataset.h==='peso' ? (el.value===''?'':Number(el.value)) : el.value; });
+    });
+    o.fechaFin = v('ed-fechaFin') || '';
+  }
+}
+function refreshEditorLive(){
+  readEditor();
+  $('#edStatement').textContent = statement(ED);
+  const iss = objIssues(ED);
+  $('#edIssues').innerHTML = iss.length ? iss.map(i=>`<li class="${i[0]}">${esc(i[1])}</li>`).join('') : '<li class="ok">Sin observaciones.</li>';
+  if(ED.tipo==='hitos'){ const s = ED.hitos.reduce((a,h)=>a+(N(h.peso)||0),0); $('#hitosSum').textContent = `Suma de pesos: ${round(s)}%`; }
+}
+function bindEditor(){
+  const root = $('#drawerRoot');
+  root.addEventListener('input', refreshEditorLive);
+  root.addEventListener('change', refreshEditorLive);
+  $('#edBg').addEventListener('click', e=>{ if(e.target.id==='edBg') closeEditor(); });
+  $('#edClose').onclick = closeEditor; $('#edCancel').onclick = closeEditor;
+  document.querySelectorAll('#ed-tipo button').forEach(b=>b.onclick = ()=>{ readEditor(); ED.tipo = b.dataset.t; if(ED.tipo==='hitos' && !ED.hitos.length){ ED.hitos=[{id:newId('h'),nombre:'',evidencia:'',trimestre:'T2',peso:''},{id:newId('h'),nombre:'',evidencia:'',trimestre:'T4',peso:''}]; } renderEditor(); });
+  const add = $('#btnAddHito'); if(add) add.onclick = ()=>{ readEditor(); ED.hitos.push({id:newId('h'),nombre:'',evidencia:'',trimestre:'T4',peso:''}); renderEditor(); };
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick = ()=>{ readEditor(); ED.hitos.splice(Number(b.dataset.del),1); renderEditor(); });
+  const sb = $('#btnSuggestBands'); if(sb) sb.onclick = ()=>{
+    readEditor(); const k = ED.kpi; const b = N(k.lineaBase), m = N(k.metaAnual);
+    if(b===null || m===null || b===m){ toast('Ingresa línea base y meta distintas para sugerir.'); return; }
+    const gap = Math.abs(m-b), s = k.sentido==='menor'?-1:1;
+    $('#k-umbral').value = round(m - s*0.3*gap, 2); $('#k-sobresaliente').value = round(m + s*0.2*gap, 2); refreshEditorLive();
+  };
+  const ql = $('#btnQLinear'); if(ql) ql.onclick = ()=>{
+    readEditor(); const k = ED.kpi; const b = N(k.lineaBase), m = N(k.metaAnual);
+    if(b===null||m===null){ toast('Ingresa línea base y meta anual.'); return; }
+    QS.forEach((q,i)=>{ $('#q-'+q).value = round(b + (m-b)*(i+1)/4, 2); }); refreshEditorLive();
+  };
+  const qf = $('#btnQFlat'); if(qf) qf.onclick = ()=>{ readEditor(); const m = N(ED.kpi.metaAnual); if(m===null){ toast('Ingresa la meta anual.'); return; } QS.forEach(q=>{ $('#q-'+q).value = m; }); refreshEditorLive(); };
+  $('#edSave').onclick = saveEditor;
+  const d = $('#edDelete'); if(d) d.onclick = ()=>{
+    const evs = Object.keys(S.evaluaciones).filter(id=>id.startsWith(ED.id+'__')).length;
+    $('#edConfirm').innerHTML = `<div class="confirm-bar"><span>¿Eliminar este objetivo${evs?` y sus ${evs} evaluación(es)`:''}? No se puede deshacer.</span><button class="btn danger" id="edDelYes">Sí, eliminar</button><button class="btn" id="edDelNo">No</button></div>`;
+    $('#edDelNo').onclick = ()=>{ $('#edConfirm').innerHTML=''; };
+    $('#edDelYes').onclick = async ()=>{
+      const o = S.objetivos[ED.id];
+      try{
+        for(const id of Object.keys(S.evaluaciones).filter(id=>id.startsWith(ED.id+'__'))) await del('evaluaciones', id);
+        await del('objetivos', ED.id);
+      }catch(e){ return; }
+      await logMove('Eliminar objetivo', `${o.gerencia} · ${o.anio} · ${shortName(o)}`);
+      closeEditor(); toast('Objetivo eliminado'); renderAll();
+    };
+  };
+  const dup = $('#edDup'); if(dup) dup.onclick = async ()=>{
+    readEditor();
+    const c = JSON.parse(JSON.stringify(ED)); delete c._isNew;
+    c.id = newId('ob'); c.anio = Number(ED.anio)+1; c.estado = 'borrador';
+    if(c.tipo!=='hitos'){
+      const lastQ = [...QS].reverse().find(q=>{ const e = S.evaluaciones[evId(ED.id,q)]; return e && isNum(e.real); });
+      if(lastQ){ c.kpi.lineaBase = Number(S.evaluaciones[evId(ED.id,lastQ)].real); c.sustento = `Línea base tomada del real ${lastQ} ${ED.anio}. ` + (c.sustento||''); }
+      c.kpi.metasQ = {}; c.kpi.umbral=''; c.kpi.metaAnual=''; c.kpi.sobresaliente='';
+    } else { c.hitos = c.hitos.map(h=>({...h, id:newId('h')})); }
+    try{ await put('objetivos', c.id, c); }catch(e){ return; }
+    await logMove('Duplicar objetivo', `${c.gerencia} · ${ED.anio} → ${c.anio} · ${shortName(c)}`);
+    closeEditor(); toast(`Copiado como borrador en ${c.anio}. Define la nueva meta.`); renderAll();
+  };
+}
+async function saveEditor(){
+  readEditor();
+  const o = JSON.parse(JSON.stringify(ED)); const isNew = o._isNew; delete o._isNew;
+  if(!o.gerencia){ toast('Elige la gerencia.'); return; }
+  if(o.tipo==='hitos'){ o.hitos = o.hitos.filter(h=>h.nombre||h.peso); o.hitos.forEach(h=>{ if(!h.id) h.id=newId('h'); }); }
+  if(o.orden===undefined) o.orden = objsOf(o.anio, o.gerencia).length + 1;
+  o.actualizado = new Date().toISOString(); o.actualizadoPor = userName();
+  try{ await put('objetivos', o.id, o); }catch(e){ return; }
+  await logMove(isNew?'Crear objetivo':'Editar objetivo', `${o.gerencia} · ${o.anio} · ${shortName(o)} · peso ${o.peso||0}%`);
+  UI.ger = o.gerencia; UI.year = Number(o.anio); saveUI();
+  closeEditor(); toast('Objetivo guardado'); renderAll();
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && ED) closeEditor(); });
+
+// ====================== Vista: Evaluación ======================
+function cierreId(g, y, q){ return slug(g)+'__'+y+'-'+q; }
+function renderEvaluacion(){
+  const y = UI.year, evQs = (ANIOS[y]||{}).evalua || QS;
+  if(!UI.q || !evQs.includes(UI.q)) UI.q = currentQ(y);
+  const q = UI.q;
+  $('#evQSeg').innerHTML = QS.map(x=>`<button type="button" data-q="${x}" aria-pressed="${x===q}" ${evQs.includes(x)?'':'disabled title="No se evalúa este año"'}>${x}</button>`).join('');
+  const objs = objsOf(y, UI.ger);
+  const cierre = S.cierres[cierreId(UI.ger,y,q)] || {estado:'abierta'};
+  const locked = cierre.estado !== 'abierta' && !UI.calib;
+  $('#evTitle').textContent = `Evaluación ${q} ${y} · ${UI.ger}`;
+  $('#evSub').innerHTML = `Resultado acumulado al cierre de ${q}${q==='T4'?' (equivale al resultado anual)':''}. Estado: <span class="chip ${cierre.estado==='calibrada'?'ok':cierre.estado==='enviada'?'acc':''}">${ESTADOS_CIERRE[cierre.estado]}</span>${cierre.por?` <span class="small muted">por ${esc(cierre.por)} el ${esc((cierre.fecha||'').slice(0,10))}</span>`:''}`;
+  $('#evClosedNote').innerHTML = locked ? '<p class="hint info" style="margin-bottom:10px">La evaluación fue enviada. Para corregir, actívala en modo calibración o reábrela.</p>' : '';
+  if(!objs.length){ $('#evTable').innerHTML = `<tbody><tr><td class="empty">${esc(UI.ger)} no tiene objetivos en ${y}.</td></tr></tbody>`; $('#evTotal').innerHTML=''; $('#evActions').innerHTML=''; return; }
+  const calib = UI.calib;
+  $('#evTable').innerHTML = `<thead><tr><th>Objetivo</th><th class="r">Peso</th><th class="r">Umbral</th><th class="r">Meta ${q}</th><th class="r">Sobresal.</th><th>Real / hitos</th><th class="r">Puntaje</th>${calib?'<th>Ajuste calibración</th>':''}<th>Calificación</th><th>Comentario y confianza</th></tr></thead><tbody>${
+    objs.map(o=>{
+      const k = o.kpi||{}; const ev = evalOf(o,q) || {};
+      const b = o.tipo!=='hitos' ? bandsFor(o,q) : null;
+      const raw = rawScore(o,q), fin = finalScore(o,q);
+      let realCell;
+      if(o.tipo==='hitos'){
+        const prevQ = QS.slice(0, QS.indexOf(q)).reverse().map(x=>evalOf(o,x)).find(Boolean);
+        const st = Object.assign({}, (prevQ&&prevQ.hitos)||{}, ev.hitos||{});
+        realCell = `<div class="hitos-eval">${(o.hitos||[]).map(h=>{
+          const due = QS.indexOf(h.trimestre) <= QS.indexOf(q);
+          return `<label><select data-hito="${esc(h.id)}" data-oid="${esc(o.id)}" ${locked?'disabled':''}>${Object.entries(HITO_EST).map(([v,t])=>`<option value="${v}" ${(st[h.id]||'pendiente')===v?'selected':''}>${t}</option>`).join('')}</select><span class="${due?'':'muted'}">${esc(h.nombre)} <span class="small muted">(${h.trimestre} · ${h.peso||0}%)</span></span></label>`;
+        }).join('')}</div>`;
+      } else {
+        realCell = `<input type="number" step="any" class="eval-real" data-real="${esc(o.id)}" value="${esc(ev.real)}" ${locked?'disabled':''} aria-label="Valor real"> <span class="small muted">${esc(k.unidad||'')}</span>`;
+      }
+      const noTarget = !hasTargetIn(o,q);
+      return `<tr>
+        <td style="min-width:220px"><span class="pilar ${esc(o.pilar)}">${esc((PILARES[o.pilar]||{}).corto||'—')}</span> ${esc(shortName(o))}${noTarget?'<div class="small muted">Sin meta en este trimestre: no pondera.</div>':''}${k.fuente&&o.tipo!=='hitos'?`<div class="small muted">Fuente: ${esc(k.fuente)}</div>`:''}</td>
+        <td class="r num">${round(o.peso)||0}%</td>
+        <td class="r num">${b?fmt(b.umbral,k.unidad):'—'}</td>
+        <td class="r num"><b>${b?fmt(b.meta,k.unidad):(o.tipo==='hitos'?'hitos a '+q:'—')}</b></td>
+        <td class="r num">${b?fmt(b.sobresaliente,k.unidad):'—'}</td>
+        <td>${realCell}</td>
+        <td class="r num"><b>${fin===null?'—':round(fin)}</b>${calib&&raw!==null&&raw!==fin?`<div class="small muted">calc. ${round(raw)}</div>`:''}</td>
+        ${calib?`<td><div style="display:flex;flex-direction:column;gap:4px;min-width:170px"><input type="number" min="-20" max="20" step="1" data-ajuste="${esc(o.id)}" value="${esc(ev.ajuste)}" placeholder="± pts" aria-label="Ajuste"><input data-motivo="${esc(o.id)}" value="${esc(ev.motivoAjuste)}" placeholder="Motivo del ajuste" aria-label="Motivo"></div></td>`:''}
+        <td>${ratingChip(fin)}</td>
+        <td style="min-width:220px"><div style="display:flex;flex-direction:column;gap:4px">
+          <select data-conf="${esc(o.id)}" ${locked?'disabled':''} aria-label="Confianza para el cierre del año"><option value="">Confianza al cierre del año…</option><option value="alta" ${ev.confianza==='alta'?'selected':''}>Alta: lo lograremos</option><option value="media" ${ev.confianza==='media'?'selected':''}>Media: hay riesgo</option><option value="baja" ${ev.confianza==='baja'?'selected':''}>Baja: no lo lograremos</option></select>
+          <textarea data-com="${esc(o.id)}" rows="2" ${locked?'disabled':''} placeholder="Qué explica el resultado y qué acción sigue">${esc(ev.comentario)}</textarea></div></td>
+      </tr>`;
+    }).join('')}</tbody>`;
+  const r = scorecardResult(objs.filter(o=>hasTargetIn(o,q)), q);
+  $('#evTotal').innerHTML = `<div class="row" style="gap:18px"><div><div class="label">Puntaje ponderado</div><div class="num" style="font-size:26px;font-weight:600">${r.score===null?'—':round(r.score)}</div></div><div><div class="label">Calificación</div><div style="font-size:16px">${ratingChip(r.score)}</div></div><div><div class="label">Peso evaluado</div><div class="num">${round(r.cobertura)}%</div></div></div>`;
+  const acts = [];
+  if(cierre.estado==='abierta') acts.push(`<button class="btn primary" data-cierre="enviada" ${r.cobertura<100?'title="Hay objetivos sin resultado"':''}>Enviar a GTH</button>`);
+  if(cierre.estado==='enviada') acts.push('<button class="btn" data-cierre="abierta">Reabrir</button><button class="btn primary" data-cierre="calibrada">Marcar calibrada</button>');
+  if(cierre.estado==='calibrada') acts.push('<button class="btn" data-cierre="enviada">Volver a enviada</button>');
+  $('#evActions').innerHTML = (r.cobertura<100 && cierre.estado==='abierta' ? `<span class="small muted">Falta registrar ${round(100-r.cobertura)}% del peso.</span>` : '') + acts.join('');
+}
+let evTimers = {};
+function evPatch(oid, patch){
+  const q = UI.q, id = evId(oid, q);
+  const cur = Object.assign({objetivoId:oid, trimestre:q, anio:UI.year}, S.evaluaciones[id]||{});
+  const next = Object.assign(cur, patch, {actualizado:new Date().toISOString(), por:userName()});
+  S.evaluaciones[id] = next;
+  clearTimeout(evTimers[id]);
+  evTimers[id] = setTimeout(async ()=>{
+    try{ await put('evaluaciones', id, S.evaluaciones[id]); }catch(e){}
+    evTimers[id] = null;
+  }, 600);
+}
+$('#evTable').addEventListener('change', e=>{
+  const t = e.target;
+  if(t.dataset.real){ evPatch(t.dataset.real, {real: t.value===''?null:Number(t.value)}); renderEvaluacion(); }
+  else if(t.dataset.hito){
+    const o = S.objetivos[t.dataset.oid]; const q = UI.q;
+    const prevQ = QS.slice(0, QS.indexOf(q)).reverse().map(x=>evalOf(o,x)).find(Boolean);
+    const st = Object.assign({}, (prevQ&&prevQ.hitos)||{}, (evalOf(o,q)||{}).hitos||{});
+    st[t.dataset.hito] = t.value; evPatch(o.id, {hitos:st}); renderEvaluacion();
+  }
+  else if(t.dataset.conf){ evPatch(t.dataset.conf, {confianza:t.value}); }
+  else if(t.dataset.ajuste){ const v = t.value===''?null:Math.max(-20,Math.min(20,Number(t.value))); evPatch(t.dataset.ajuste, {ajuste:v}); renderEvaluacion(); }
+  else if(t.dataset.motivo!==undefined && t.dataset.motivo){ evPatch(t.dataset.motivo, {motivoAjuste:t.value}); }
+});
+$('#evTable').addEventListener('input', e=>{ const t = e.target; if(t.dataset.com){ evPatch(t.dataset.com, {comentario:t.value}); } });
+$('#evQSeg').addEventListener('click', e=>{ const b = e.target.closest('button[data-q]'); if(!b||b.disabled) return; UI.q = b.dataset.q; renderEvaluacion(); });
+$('#evCalib').addEventListener('change', e=>{ UI.calib = e.target.checked; renderEvaluacion(); });
+$('#evActions').addEventListener('click', async e=>{
+  const b = e.target.closest('button[data-cierre]'); if(!b) return;
+  const id = cierreId(UI.ger, UI.year, UI.q);
+  const data = {gerencia:UI.ger, anio:UI.year, trimestre:UI.q, estado:b.dataset.cierre, fecha:new Date().toISOString(), por:userName()||'Sin nombre'};
+  const objs = objsOf(UI.year, UI.ger).filter(o=>hasTargetIn(o,UI.q));
+  data.puntaje = round(scorecardResult(objs, UI.q).score);
+  try{ await put('cierres', id, data); }catch(err){ return; }
+  await logMove('Evaluación '+ESTADOS_CIERRE[data.estado].toLowerCase(), `${UI.ger} · ${UI.q} ${UI.year} · puntaje ${data.puntaje??'—'}`);
+  toast('Estado actualizado: '+ESTADOS_CIERRE[data.estado]); renderAll();
+});
+
+// ====================== Vista: Consolidado ======================
+function renderConsolidado(){
+  const y = UI.year, evQs = (ANIOS[y]||{}).evalua || QS;
+  if(!UI.coQ || !evQs.includes(UI.coQ)) UI.coQ = currentQ(y);
+  const gers = gerNames().filter(g=>objsOf(y,g).length);
+  const rows = gers.map(g=>{
+    const os = objsOf(y,g);
+    const qs = {}; evQs.forEach(q=>{ qs[q] = scorecardResult(os.filter(o=>hasTargetIn(o,q)), q); });
+    return {g, os, qs};
+  });
+  $('#coTable').innerHTML = gers.length ? `<thead><tr><th>Gerencia</th><th class="r">Objetivos</th>${evQs.map(q=>`<th class="r">${q}</th><th>Estado ${q}</th>`).join('')}<th>Calificación ${evQs[evQs.length-1]}</th></tr></thead><tbody>${
+    rows.map(r=>`<tr class="clickable" data-ger="${esc(r.g)}"><td>${esc(r.g)}</td><td class="r num">${r.os.length}</td>${evQs.map(q=>{
+      const c = S.cierres[cierreId(r.g,y,q)]; const s = r.qs[q];
+      return `<td class="r num"><b>${s.score===null?'—':round(s.score)}</b>${s.score!==null&&s.cobertura<100?`<div class="small muted">${round(s.cobertura)}% peso</div>`:''}</td><td><span class="chip ${c&&c.estado==='calibrada'?'ok':c&&c.estado==='enviada'?'acc':''}">${ESTADOS_CIERRE[(c&&c.estado)||'abierta']}</span></td>`;
+    }).join('')}<td>${ratingChip(r.qs[evQs[evQs.length-1]].score)}</td></tr>`).join('')}</tbody>` : `<tbody><tr><td class="empty">Sin scorecards en ${y}.</td></tr></tbody>`;
+  const q = UI.coQ;
+  $('#coQSeg').innerHTML = evQs.map(x=>`<button type="button" data-q="${x}" aria-pressed="${x===q}">${x}</button>`).join('');
+  const scores = rows.map(r=>r.qs[q].score).filter(s=>s!==null);
+  const dist = RATINGS.slice().reverse().map(rt=>({rt, n:scores.filter(s=>ratingOf(s).n===rt.n).length}));
+  const maxN = Math.max(1, ...dist.map(d=>d.n));
+  $('#coDist').innerHTML = scores.length ? dist.map(d=>`<div style="display:grid;grid-template-columns:150px 1fr 30px;gap:10px;align-items:center;margin-bottom:8px"><span class="rating r${d.rt.n} small">${d.rt.n} · ${d.rt.nombre}</span><div style="height:14px;background:var(--surface-2);border-radius:4px;overflow:hidden"><div style="height:100%;width:${100*d.n/maxN}%;background:var(--accent)"></div></div><span class="num small">${d.n}</span></div>`).join('') + `<p class="small muted">${scores.length} gerencia(s) con resultado en ${q}. La calibración revisa que la distribución sea coherente con el resultado de la compañía.</p>` : `<p class="empty">Aún no hay resultados cargados para ${q} ${y}.</p>`;
+  const avg = scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : null;
+  const enviados = gers.filter(g=>{ const c = S.cierres[cierreId(g,y,q)]; return c && c.estado!=='abierta'; }).length;
+  const allObjs = objsOf(y);
+  const riesgo = allObjs.filter(o=>{ const e = evalOf(o,q); return e && e.confianza==='baja'; }).length;
+  const bajoUmbral = allObjs.filter(o=>finalScore(o,q)===0).length;
+  $('#coTiles').innerHTML = `
+    <div class="tile"><span class="label">Promedio ${q} ${y}</span><span class="big num">${avg===null?'—':round(avg)}</span><span class="small">${avg===null?'':ratingChip(avg)}</span></div>
+    <div class="tile"><span class="label">Gerencias enviadas</span><span class="big num">${enviados}/${gers.length}</span><span class="small muted">en ${q}</span></div>
+    <div class="tile"><span class="label">Objetivos bajo umbral</span><span class="big num">${bajoUmbral}</span><span class="small muted">aportan 0 puntos en ${q}</span></div>
+    <div class="tile"><span class="label">Confianza baja</span><span class="big num">${riesgo}</span><span class="small muted">objetivos que el dueño ve en riesgo</span></div>`;
+  $('#coPilar').innerHTML = gers.length ? `<thead><tr><th>Gerencia</th>${Object.keys(PILARES).map(p=>`<th class="r"><span class="pilar ${p}">${PILARES[p].corto}</span></th>`).join('')}</tr></thead><tbody>${
+    rows.map(r=>{ const pw={}; Object.keys(PILARES).forEach(p=>pw[p]=0); r.os.forEach(o=>{ if(pw[o.pilar]!==undefined) pw[o.pilar]+=N(o.peso)||0; });
+      return `<tr><td class="small">${esc(r.g)}</td>${Object.keys(PILARES).map(p=>`<td class="r num ${pw[p]?'':'muted'}">${pw[p]?round(pw[p])+'%':'—'}</td>`).join('')}</tr>`; }).join('')}</tbody>` : '';
+}
+$('#coTable').addEventListener('click', e=>{ const tr = e.target.closest('tr[data-ger]'); if(!tr) return; UI.ger = tr.dataset.ger; saveUI(); document.querySelector('#tabs button[data-view="evaluacion"]').click(); });
+$('#coQSeg').addEventListener('click', e=>{ const b = e.target.closest('button[data-q]'); if(!b) return; UI.coQ = b.dataset.q; renderConsolidado(); });
+
+// ====================== Vista: Reglas ======================
+function renderReglas(){
+  const W=520,H=230,L=44,R=14,T=14,B=34;
+  const xs = v => L + (v-80)/(130-80)*(W-L-R);   // eje x: % de la meta (80..130)
+  const ys = v => T + (1 - v/130)*(H-T-B);
+  // ejemplo: umbral 90%, meta 100%, sobresaliente 110%
+  const pts = [[80,0],[89.99,0],[90,50],[100,100],[110,120],[130,120]];
+  const path = pts.map((p,i)=>(i?'L':'M')+xs(p[0]).toFixed(1)+','+ys(p[1]).toFixed(1)).join(' ');
+  const gx = [80,90,100,110,120,130], gy=[0,50,100,120];
+  $('#curveBox').innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Curva: 0 puntos bajo el umbral, 50 en el umbral, 100 en la meta, 120 en el sobresaliente">
+    ${gy.map(v=>`<line x1="${L}" x2="${W-R}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${ys(v)+3}" text-anchor="end">${v}</text>`).join('')}
+    ${gx.map(v=>`<text x="${xs(v)}" y="${H-B+16}" text-anchor="middle">${v}%</text>`).join('')}
+    <text x="${(L+W-R)/2}" y="${H-4}" text-anchor="middle">Resultado como % de la meta (ejemplo: umbral 90%, sobresaliente 110%)</text>
+    <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    ${[[90,50,'Umbral'],[100,100,'Meta'],[110,120,'Sobresaliente']].map(p=>`<circle cx="${xs(p[0])}" cy="${ys(p[1])}" r="4.5" fill="var(--accent)"/><text x="${xs(p[0])+7}" y="${ys(p[1])+(p[1]===120?14:-6)}">${p[2]}</text>`).join('')}
+  </svg>`;
+  $('#ratingTable').innerHTML = `<thead><tr><th>Nivel</th><th>Calificación</th><th class="r">Puntaje</th><th>Significado</th></tr></thead><tbody>${
+    RATINGS.map((r,i)=>`<tr><td class="num rating r${r.n}">${r.n}</td><td class="rating r${r.n}">${r.nombre}</td><td class="r num">${i===0?'≥ '+r.min:r.min+' – '+(RATINGS[i-1].min-0.1)}</td><td class="small">${r.desc}</td></tr>`).join('')}</tbody>`;
+}
+
+// ====================== Vista: Datos ======================
+function csv(rows){ return '﻿' + rows.map(r=>r.map(v=>{ const s = v===null||v===undefined ? '' : String(v); return /[;"\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }).join(';')).join('\r\n'); }
+async function offerFile(filename, content){
+  if(DL){
+    try{ await DL.save({filename, data:content}); toast('Archivo listo'); return; }
+    catch(e){ if(e && e.code==='declined') return; }
+  }
+  if(!window.claude){ // abierto como archivo local
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content])); a.download = filename; document.body.appendChild(a); a.click(); a.remove(); return;
+  }
+  $('#exportFallback').innerHTML = `<p class="small muted" style="margin-top:10px">Copia el contenido y guárdalo como <b>${esc(filename)}</b>:</p><textarea readonly rows="8" style="font-family:var(--font-data);font-size:12px">${esc(content)}</textarea>`;
+}
+$('#btnCsvObj').addEventListener('click', ()=>{
+  const y = UI.year;
+  const rows = [['ID','Año','Gerencia','Responsable','Pilar','Perspectiva','Objetivo','Enunciado','Tipo','Peso %','Indicador','Fórmula','Unidad','Mejor es','Línea base','Umbral','Meta anual','Sobresaliente','Meta T1','Meta T2','Meta T3','Meta T4','Hitos (trimestre/peso)','Fuente','Responsable del dato','Estado']];
+  objsOf(y).forEach(o=>{ const k=o.kpi||{}; const mq=k.metasQ||{};
+    rows.push([o.id,o.anio,o.gerencia,o.responsable,(PILARES[o.pilar]||{}).nombre||'',(PILARES[o.pilar]||{}).corto||'',o.titulo,statement(o),o.tipo==='hitos'?'Proyecto con hitos':'Indicador',o.peso,
+      o.tipo==='hitos'?'':k.indicador,o.tipo==='hitos'?'':k.formula,o.tipo==='hitos'?'':k.unidad,o.tipo==='hitos'?'':k.sentido,o.tipo==='hitos'?'':k.lineaBase,o.tipo==='hitos'?'':k.umbral,o.tipo==='hitos'?'':k.metaAnual,o.tipo==='hitos'?'':k.sobresaliente,
+      mq.T1,mq.T2,mq.T3,mq.T4,(o.hitos||[]).map(h=>`${h.nombre} (${h.trimestre}/${h.peso}%)`).join(' | '),k.fuente,k.responsableDato,ESTADOS_OBJ[o.estado]||'Borrador']); });
+  offerFile(`objetivos_frigor_${y}.csv`, csv(rows));
+});
+$('#btnCsvEval').addEventListener('click', ()=>{
+  const y = UI.year, evQs = (ANIOS[y]||{}).evalua || QS;
+  const rows = [['Año','Trimestre','Gerencia','ID objetivo','Objetivo','Peso %','Umbral','Meta trimestre','Sobresaliente','Real','Hitos cumplidos','Puntaje calculado','Ajuste','Motivo ajuste','Puntaje final','Calificación','Confianza','Comentario','Estado evaluación']];
+  evQs.forEach(q=>objsOf(y).forEach(o=>{
+    if(!hasTargetIn(o,q)) return;
+    const ev = evalOf(o,q)||{}; const b = o.tipo!=='hitos'?bandsFor(o,q):null; const fin = finalScore(o,q); const rt = ratingOf(fin);
+    const c = S.cierres[cierreId(o.gerencia,y,q)];
+    rows.push([y,q,o.gerencia,o.id,shortName(o),o.peso,b?b.umbral:'',b?b.meta:'',b?b.sobresaliente:'',ev.real??'',
+      o.tipo==='hitos'?(o.hitos||[]).filter(h=>(ev.hitos||{})[h.id]==='cumplido').map(h=>h.nombre).join(' | '):'',
+      round(rawScore(o,q)),ev.ajuste??'',ev.motivoAjuste||'',round(fin),rt?rt.n+' '+rt.nombre:'',ev.confianza||'',ev.comentario||'',ESTADOS_CIERRE[(c&&c.estado)||'abierta']]);
+  }));
+  offerFile(`evaluaciones_frigor_${y}.csv`, csv(rows));
+});
+$('#btnJsonBackup').addEventListener('click', ()=>{
+  const data = {formato:'frigor-objetivos-v4', exportado:new Date().toISOString(), objetivos:Object.values(S.objetivos), evaluaciones:S.evaluaciones, cierres:S.cierres, gerencias:S.gerencias};
+  offerFile(`respaldo_objetivos_frigor_${today()}.json`, JSON.stringify(data, null, 2));
+});
+
+// Migración desde el Constructor SMART 2026 (objectives-v3 / registros-v2)
+const OLD_CAT = {Financieros:'FIN', Clientes:'CLI', Operativos:'PRO', Gente:'GEN'};
+function quarterOfKey(key){
+  let m;
+  if((m = /^(\d{4})-(\d{2})$/.exec(key))) return {y:+m[1], q:'T'+Math.ceil(+m[2]/3), ord:+m[2]};
+  if((m = /^(\d{4})-Q([1-4])$/.exec(key))) return {y:+m[1], q:'T'+m[2], ord:+m[2]*3};
+  if((m = /^(\d{4})-S([1-2])$/.exec(key))) return {y:+m[1], q:m[2]==='1'?'T2':'T4', ord:+m[2]*6};
+  return null;
+}
+function convertOld(imported){
+  const objs = [], evs = {};
+  (imported.objectives||[]).forEach(oo=>{
+    const anio = Number(String(oo.fechaCorte||'').slice(-4)) || 2026;
+    const o = blankObj(); o.id = 'v3-'+oo.id; o.anio = anio>2026?2026:anio; o.gerencia = oo.area; o.pilar = OLD_CAT[oo.categoria]||''; o.estado='aprobado';
+    o.sustento = oo.justificacion||''; o.titulo = '';
+    if(oo.sentido === 'cumplir'){
+      o.tipo = 'hitos'; o.titulo = 'Cumplir '+oo.indicador; o.hitos = [{id:newId('h'), nombre:oo.indicador, evidencia:oo.fuente||'', trimestre:'T4', peso:100}];
+    } else {
+      const k = o.kpi; k.indicador = oo.indicador; k.unidad = oo.unidad||''; k.sentido = oo.sentido==='reducir'?'menor':'mayor';
+      k.lineaBase = oo.base; k.metaAnual = oo.meta; k.fuente = oo.fuente||'';
+      const mi = oo.metasIntermedias || {};
+      QS.forEach((q,i)=>{ const keys = Object.keys(mi).map(x=>({x, p:quarterOfKey(x)})).filter(z=>z.p&&z.p.q===q).sort((a,b)=>a.p.ord-b.p.ord); if(keys.length) k.metasQ[q] = mi[keys[keys.length-1].x]; });
+    }
+    objs.push(o);
+  });
+  const latest = {};
+  (imported.registros||[]).forEach(r=>{
+    const p = quarterOfKey(r.fecha); if(!p) return;
+    const oid = 'v3-'+r.objectiveId; const id = evId(oid, p.q);
+    if(!latest[id] || latest[id].ord < p.ord) latest[id] = {ord:p.ord, r, oid, q:p.q};
+  });
+  Object.entries(latest).forEach(([id, z])=>{
+    const o = objs.find(x=>x.id===z.oid); if(!o) return;
+    const base = {objetivoId:z.oid, trimestre:z.q, anio:o.anio, comentario:z.r.comentario||'', confianza:{bien:'alta',riesgo:'media',mal:'baja'}[z.r.confianza]||'', por:z.r.autor||'', actualizado:new Date().toISOString()};
+    if(o.tipo==='hitos'){ base.hitos = {[o.hitos[0].id]: Number(z.r.valor)>=1?'cumplido':'no_cumplido'}; }
+    else base.real = Number(z.r.valor);
+    evs[id] = base;
+  });
+  return {objs, evs};
+}
+$('#importFile').addEventListener('change', async e=>{
+  const f = e.target.files[0]; if(!f) return;
+  let data; try{ data = JSON.parse(await f.text()); }catch(err){ $('#importResult').innerHTML = '<p class="hint">El archivo no es un JSON válido.</p>'; return; }
+  let objs=[], evs={}, cierres={}, origen='';
+  if(data.formato === 'frigor-objetivos-v4'){ objs = data.objetivos||[]; evs = data.evaluaciones||{}; cierres = data.cierres||{}; origen='respaldo';
+    if(Array.isArray(data.gerencias)){ data.gerencias.forEach(g=>{ if(!gerNames().includes(g.nombre)) S.gerencias.push(g); }); await saveGerencias(); } }
+  else if(Array.isArray(data.objectives)){ const c = convertOld(data); objs = c.objs; evs = c.evs; origen='Constructor SMART anterior'; }
+  else { $('#importResult').innerHTML = '<p class="hint">No reconozco el formato. Usa un respaldo de esta herramienta o el .json exportado del Constructor anterior.</p>'; return; }
+  let add=0, upd=0, ne=0;
+  objs.forEach(o=>{ if(o.gerencia && !gerNames().includes(o.gerencia)) S.gerencias.push({nombre:o.gerencia, dependeDe:'Gerencia General'}); });
+  await saveGerencias();
+  $('#importResult').innerHTML = '<p class="small muted">Importando…</p>';
+  try{
+    for(const o of objs){ if(S.objetivos[o.id]) upd++; else add++; await put('objetivos', o.id, o); }
+    for(const [id, ev] of Object.entries(evs)){ await put('evaluaciones', id, ev); ne++; }
+    for(const [id, c] of Object.entries(cierres)){ await put('cierres', id, c); }
+  }catch(err){ $('#importResult').innerHTML = '<p class="hint">La importación se detuvo por un error al guardar. Revisa tu permiso de edición.</p>'; return; }
+  await logMove('Importar '+origen, `${f.name}: ${add} objetivos nuevos, ${upd} actualizados, ${ne} evaluaciones`);
+  $('#importResult').innerHTML = `<p class="hint info">Desde ${esc(origen)}: ${add} objetivos nuevos, ${upd} actualizados y ${ne} evaluaciones.${origen!=='respaldo'?' Revisa pesos, umbral y sobresaliente: el Constructor anterior no los tenía.':''}</p>`;
+  e.target.value=''; renderAll();
+});
+function renderDatos(){
+  $('#gerTable').innerHTML = `<thead><tr><th>Gerencia</th><th>Depende de</th><th class="r">Obj. ${UI.year}</th></tr></thead><tbody>${S.gerencias.map(g=>`<tr><td>${esc(g.nombre)}</td><td class="small muted">${esc(g.dependeDe)}</td><td class="r num">${objsOf(UI.year,g.nombre).length}</td></tr>`).join('')}</tbody>`;
+  $('#gerParent').innerHTML = ['Directorio', ...gerNames()].map(n=>`<option>${esc(n)}</option>`).join('');
+  if(document.activeElement !== $('#userName')) $('#userName').value = userName();
+  const log = S.bitacora.slice(-200).reverse();
+  $('#logTable').innerHTML = `<thead><tr><th>Fecha</th><th>Quién</th><th>Acción</th><th>Detalle</th></tr></thead><tbody>${log.length?log.map(l=>`<tr><td class="num small">${esc(l.f.slice(0,16).replace('T',' '))}</td><td class="small">${esc(l.quien)}</td><td class="small">${esc(l.accion)}</td><td class="small">${esc(l.detalle)}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">Sin movimientos todavía.</td></tr>'}</tbody>`;
+}
+$('#btnAddGer').addEventListener('click', async ()=>{
+  const n = $('#gerNew').value.trim(); if(!n){ toast('Escribe el nombre.'); return; }
+  if(gerNames().some(x=>x.toLowerCase()===n.toLowerCase())){ toast('Esa gerencia ya existe.'); return; }
+  S.gerencias.push({nombre:n, dependeDe:$('#gerParent').value}); await saveGerencias();
+  await logMove('Agregar gerencia', `${n} (depende de ${$('#gerParent').value})`); $('#gerNew').value=''; renderAll();
+});
+$('#btnSaveUser').addEventListener('click', ()=>{ try{ localStorage.setItem('frigor-user', $('#userName').value.trim()); toast('Nombre guardado'); }catch(e){ toast('Este navegador no permite guardar el nombre.'); } });
+
+// ====================== Render ======================
+function renderAll(){
+  renderCtx();
+  if(ED) return; // no re-dibujar debajo del editor abierto
+  const v = UI.view;
+  if(v==='inicio') renderInicio();
+  else if(v==='objetivos') renderObjetivos();
+  else if(v==='evaluacion'){ const a = document.activeElement; if(a && a.closest && a.closest('#evTable') && /TEXTAREA|INPUT/.test(a.tagName)) return; renderEvaluacion(); }
+  else if(v==='consolidado') renderConsolidado();
+  else if(v==='reglas') renderReglas();
+  else if(v==='datos') renderDatos();
+}
+renderAll();
+connect();
+</script>

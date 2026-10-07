@@ -1,0 +1,505 @@
+{
+  "formato": "frigor-objetivos-v4",
+  "exportado": "2026-10-07T00:00:00Z",
+  "nota": "Objetivos 2026 del Constructor SMART convertidos al modelo nuevo para cerrar T3 y T4. Pesos, umbrales, sobresalientes y metas T3 son PROPUESTA de transición a validar con cada gerente.",
+  "objetivos": [
+    {
+      "id": "o1",
+      "anio": 2026,
+      "gerencia": "Gerencia División Comercial",
+      "pilar": "CLI",
+      "titulo": "Consolidar la nueva identidad de marca en ventas",
+      "responsable": "",
+      "peso": 33,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Comparación contra el promedio mensual del mismo trimestre pre-rebranding.",
+      "kpi": {
+        "indicador": "volumen de venta de los SKU relanzados (índice vs. pre-rebranding = 100)",
+        "formula": "",
+        "unidad": "pts",
+        "sentido": "mayor",
+        "lineaBase": 100,
+        "umbral": 108.4,
+        "metaAnual": 112,
+        "sobresaliente": 114.4,
+        "metasQ": {
+          "T3": 109.0,
+          "T4": 112
+        },
+        "fuente": "Reporte de ventas por SKU/canal",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 1
+    },
+    {
+      "id": "o2",
+      "anio": 2026,
+      "gerencia": "Gerencia División Comercial",
+      "pilar": "CLI",
+      "titulo": "Cumplir el presupuesto de exportación 2026",
+      "responsable": "",
+      "peso": 33,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Cumplimiento acumulado año a la fecha vs. presupuesto acumulado aprobado.",
+      "kpi": {
+        "indicador": "cumplimiento acumulado del presupuesto de exportación",
+        "formula": "ventas reales acumuladas / presupuesto acumulado",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 110,
+        "metasQ": {
+          "T3": 100,
+          "T4": 100
+        },
+        "fuente": "Reporte de ejecución presupuestaria de exportaciones",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 2
+    },
+    {
+      "id": "o3",
+      "anio": 2026,
+      "gerencia": "Gerencia División Comercial",
+      "pilar": "CLI",
+      "titulo": "Cumplir el presupuesto 2026 del mercado nacional",
+      "responsable": "",
+      "peso": 34,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Cumplimiento acumulado año a la fecha vs. presupuesto acumulado aprobado.",
+      "kpi": {
+        "indicador": "cumplimiento acumulado del presupuesto del mercado nacional",
+        "formula": "ventas reales acumuladas / presupuesto acumulado",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 110,
+        "metasQ": {
+          "T3": 100,
+          "T4": 100
+        },
+        "fuente": "Reporte de ejecución presupuestaria del mercado nacional",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 3
+    },
+    {
+      "id": "o4",
+      "anio": 2026,
+      "gerencia": "Gerencia División Cadena de Suministros",
+      "pilar": "CLI",
+      "titulo": "Asegurar el abastecimiento de materia prima",
+      "responsable": "",
+      "peso": 50,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Garantizar el aprovisionamiento para sostener el plan comercial. Sin sobresaliente: abastecer por encima del plan no agrega valor.",
+      "kpi": {
+        "indicador": "cumplimiento acumulado del plan de abastecimiento de materia prima",
+        "formula": "kg recibidos / kg planificados",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 100,
+        "metasQ": {
+          "T3": 100,
+          "T4": 100
+        },
+        "fuente": "Reporte de cumplimiento de abastecimiento de MP",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 4
+    },
+    {
+      "id": "o7",
+      "anio": 2026,
+      "gerencia": "Gerencia División Cadena de Suministros",
+      "pilar": "FIN",
+      "titulo": "Mejorar el nivel de servicio a clientes",
+      "responsable": "",
+      "peso": 50,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "PLACEHOLDER — falta el dato real de línea base y meta de OTIF; confirmar con Supply Chain. Fecha de corte original 31/03/2027.",
+      "kpi": {
+        "indicador": "OTIF (pedidos a tiempo y completos)",
+        "formula": "pedidos entregados a tiempo y completos / pedidos totales",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 75,
+        "umbral": 85.5,
+        "metaAnual": 90,
+        "sobresaliente": 93.0,
+        "metasQ": {
+          "T3": 86.25,
+          "T4": 90
+        },
+        "fuente": "Reporte de OTIF",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 5
+    },
+    {
+      "id": "o5",
+      "anio": 2026,
+      "gerencia": "Gerencia División Administrativa Financiera",
+      "pilar": "FIN",
+      "titulo": "Mejorar la rentabilidad operativa",
+      "responsable": "",
+      "peso": 100,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "PLACEHOLDER — falta el dato real de línea base y meta de UO/Ventas; confirmar con GAF.",
+      "kpi": {
+        "indicador": "utilidad operativa sobre ventas (UO/Ventas), acumulada",
+        "formula": "utilidad operativa acumulada / ventas acumuladas",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 15,
+        "umbral": 19.9,
+        "metaAnual": 22,
+        "sobresaliente": 23.4,
+        "metasQ": {
+          "T3": 20.25,
+          "T4": 22
+        },
+        "fuente": "Estado de resultados mensual",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 6
+    },
+    {
+      "id": "o8",
+      "anio": 2026,
+      "gerencia": "Gerencia Planificación y Finanzas",
+      "pilar": "FIN",
+      "titulo": "Acelerar la cobranza",
+      "responsable": "",
+      "peso": 100,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "PLACEHOLDER — falta el dato real de línea base y meta de días de cartera; confirmar con Tesorería.",
+      "kpi": {
+        "indicador": "días de cartera pendiente de cobro (DSO)",
+        "formula": "cuentas por cobrar / ventas a crédito × días del periodo",
+        "unidad": "días",
+        "sentido": "menor",
+        "lineaBase": 60,
+        "umbral": 42.5,
+        "metaAnual": 35,
+        "sobresaliente": 30.0,
+        "metasQ": {
+          "T3": 41.25,
+          "T4": 35
+        },
+        "fuente": "Reporte de flujo de caja y cobranza",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 7
+    },
+    {
+      "id": "o6",
+      "anio": 2026,
+      "gerencia": "Gerencia División Operaciones",
+      "pilar": "FIN",
+      "titulo": "Implementar el Sistema de Gestión de Inocuidad ISO 22000",
+      "responsable": "",
+      "peso": 25,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Transición 2026: confirmar meta acumulada T3/T4 con el cronograma (curva S) del proyecto. Para 2027 pasar a hitos verificables.",
+      "kpi": {
+        "indicador": "avance del Sistema de Gestión ISO 22000 (real vs. planificado)",
+        "formula": "% avance físico real ponderado",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 100,
+        "metasQ": {
+          "T3": 75,
+          "T4": 100
+        },
+        "fuente": "Tablero de seguimiento del proyecto",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 8
+    },
+    {
+      "id": "o9",
+      "anio": 2026,
+      "gerencia": "Gerencia División Operaciones",
+      "pilar": "PRO",
+      "titulo": "Poner en marcha la Unidad Industrial de despojos comestibles",
+      "responsable": "",
+      "peso": 25,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Transición 2026: confirmar meta acumulada T3/T4 con el cronograma (curva S) del proyecto. Para 2027 pasar a hitos verificables.",
+      "kpi": {
+        "indicador": "avance de la Unidad Industrial de despojos comestibles (real vs. planificado)",
+        "formula": "% avance físico real ponderado",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 100,
+        "metasQ": {
+          "T3": 75,
+          "T4": 100
+        },
+        "fuente": "Tablero de seguimiento del proyecto",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 9
+    },
+    {
+      "id": "o10",
+      "anio": 2026,
+      "gerencia": "Gerencia División Operaciones",
+      "pilar": "PRO",
+      "titulo": "Construir la Unidad Industrial de cárnicos procesados – Ciclo 3",
+      "responsable": "",
+      "peso": 25,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Transición 2026: confirmar meta acumulada T3/T4 con el cronograma (curva S) del proyecto. Para 2027 pasar a hitos verificables.",
+      "kpi": {
+        "indicador": "avance de la Unidad Industrial de productos cárnicos procesados – Ciclo 3 (real vs. planificado)",
+        "formula": "% avance físico real ponderado",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 100,
+        "metasQ": {
+          "T3": 75,
+          "T4": 100
+        },
+        "fuente": "Tablero de seguimiento del proyecto",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 10
+    },
+    {
+      "id": "o11",
+      "anio": 2026,
+      "gerencia": "Gerencia División Operaciones",
+      "pilar": "PRO",
+      "titulo": "Ampliar cargas térmicas y sistema de aspersión",
+      "responsable": "",
+      "peso": 25,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Transición 2026: confirmar meta acumulada T3/T4 con el cronograma (curva S) del proyecto. Para 2027 pasar a hitos verificables.",
+      "kpi": {
+        "indicador": "avance del sistema de aspersión y ampliación de cargas térmicas (real vs. planificado)",
+        "formula": "% avance físico real ponderado",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 100,
+        "metasQ": {
+          "T3": 75,
+          "T4": 100
+        },
+        "fuente": "Tablero de seguimiento del proyecto",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 11
+    },
+    {
+      "id": "o12",
+      "anio": 2026,
+      "gerencia": "Gerencia de Tecnología de la Información",
+      "pilar": "PRO",
+      "titulo": "Implementar el ERP Back Office",
+      "responsable": "",
+      "peso": 100,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Transición 2026: confirmar meta acumulada T3/T4 con el cronograma (curva S) del proyecto. Para 2027 pasar a hitos verificables (go-live por módulo).",
+      "kpi": {
+        "indicador": "avance del sistema ERP Back Office (real vs. planificado)",
+        "formula": "% avance físico real ponderado",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 100,
+        "metasQ": {
+          "T3": 75,
+          "T4": 100
+        },
+        "fuente": "Tablero de seguimiento del proyecto ERP",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 12
+    },
+    {
+      "id": "o13",
+      "anio": 2026,
+      "gerencia": "Gerencia de Talento Humano",
+      "pilar": "GEN",
+      "titulo": "Retener al personal nuevo",
+      "responsable": "",
+      "peso": 25,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "PLACEHOLDER — falta el dato real de línea base y meta; confirmar con GTH.",
+      "kpi": {
+        "indicador": "rotación no deseada de personal con antigüedad ≤ 6 meses",
+        "formula": "bajas voluntarias ≤ 6 meses / dotación promedio ≤ 6 meses",
+        "unidad": "%",
+        "sentido": "menor",
+        "lineaBase": 8,
+        "umbral": 5.9,
+        "metaAnual": 5,
+        "sobresaliente": 4.4,
+        "metasQ": {
+          "T3": 5.75,
+          "T4": 5
+        },
+        "fuente": "Reporte de rotación por antigüedad",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 13
+    },
+    {
+      "id": "o14",
+      "anio": 2026,
+      "gerencia": "Gerencia de Talento Humano",
+      "pilar": "GEN",
+      "titulo": "Formalizar planes de carrera gerenciales",
+      "responsable": "",
+      "peso": 25,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Fecha de corte original 31/07/2026: en T3 y T4 la meta es 100%.",
+      "kpi": {
+        "indicador": "posiciones gerenciales con plan de carrera formalizado",
+        "formula": "posiciones con plan firmado / posiciones gerenciales",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 100,
+        "metasQ": {
+          "T3": 100,
+          "T4": 100
+        },
+        "fuente": "Reporte de planes de carrera",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 14
+    },
+    {
+      "id": "o15",
+      "anio": 2026,
+      "gerencia": "Gerencia de Talento Humano",
+      "pilar": "GEN",
+      "titulo": "Implementar el programa de retención y reconocimiento",
+      "responsable": "",
+      "peso": 25,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Transición 2026: confirmar meta acumulada T3/T4 con el cronograma (curva S) del proyecto. ",
+      "kpi": {
+        "indicador": "avance del programa de retención y reconocimiento (real vs. planificado)",
+        "formula": "",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 100,
+        "metasQ": {
+          "T3": 75,
+          "T4": 100
+        },
+        "fuente": "Tablero de seguimiento del programa RyR",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 15
+    },
+    {
+      "id": "o16",
+      "anio": 2026,
+      "gerencia": "Gerencia de Talento Humano",
+      "pilar": "GEN",
+      "titulo": "Implementar el sistema de gestión del desempeño",
+      "responsable": "",
+      "peso": 25,
+      "tipo": "kpi",
+      "estado": "propuesto",
+      "sustento": "Transición 2026: confirmar meta acumulada T3/T4 con el cronograma (curva S) del proyecto. Este mismo sistema es parte del entregable.",
+      "kpi": {
+        "indicador": "avance del sistema de gestión de desempeño para personal administrativo y técnico",
+        "formula": "",
+        "unidad": "%",
+        "sentido": "mayor",
+        "lineaBase": 0,
+        "umbral": 90,
+        "metaAnual": 100,
+        "sobresaliente": 100,
+        "metasQ": {
+          "T3": 75,
+          "T4": 100
+        },
+        "fuente": "Tablero de seguimiento del sistema de gestión de desempeño",
+        "responsableDato": ""
+      },
+      "hitos": [],
+      "fechaFin": "",
+      "orden": 16
+    }
+  ],
+  "evaluaciones": {},
+  "cierres": {}
+}

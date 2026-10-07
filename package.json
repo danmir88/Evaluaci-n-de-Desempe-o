@@ -1,0 +1,16 @@
+{
+  "name": "objetivos-ejecutivos-frigor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gestión y evaluación trimestral de objetivos ejecutivos de FRIGOR",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  }
+}
