@@ -385,6 +385,19 @@
         <div id="periodoAddResult" class="note" style="margin-top:8px;"></div>
       </div>
       <div class="card gth-only">
+        <h3>Vaciar objetivos</h3>
+        <div class="note" style="margin-bottom:10px;">Borra los objetivos y sus check-ins para empezar de cero. No se puede deshacer: antes descarga el estado completo (.json) como respaldo. Las gerencias, los periodos y el registro de cambios se mantienen.</div>
+        <label>Qué borrar</label>
+        <select id="vaciarAlcance">
+          <option value="periodo">Solo los objetivos del periodo que estoy viendo</option>
+          <option value="todo">Todos los objetivos de todos los periodos</option>
+        </select>
+        <div class="modal-actions" style="justify-content:flex-start;margin-top:10px;">
+          <button class="btn secondary" id="btnVaciar">Vaciar objetivos…</button>
+        </div>
+        <div id="vaciarConfirm" style="margin-top:8px;"></div>
+      </div>
+      <div class="card gth-only">
         <h3>Gerencias habilitadas</h3>
         <div class="note" style="margin-bottom:10px;">Estas son las gerencias que aparecen para elegir al construir un objetivo. Agrega las que falten — no necesitas pedírmelo a mí.</div>
         <div id="gerenciasListWrap"><div class="loading">Cargando…</div></div>
@@ -2045,6 +2058,32 @@ document.getElementById('btnAddPeriodo').addEventListener('click', async ()=>{
   document.getElementById('newPeriodoAnio').value = '';
   el.innerHTML = `<span style="color:var(--green);">Periodo ${anio} abierto. Ya pueden construir objetivos ${anio}.</span>`;
   updateWelcomeLine(); renderAll();
+});
+function objetivosAVaciar(){
+  const todo = document.getElementById('vaciarAlcance').value === 'todo';
+  return todo ? objectives.slice() : yearObjectives();
+}
+document.getElementById('btnVaciar').addEventListener('click', ()=>{
+  const objs = objetivosAVaciar();
+  const todo = document.getElementById('vaciarAlcance').value === 'todo';
+  const ids = new Set(objs.map(o=>o.id));
+  const nReg = registros.filter(r=>ids.has(r.objectiveId)).length;
+  const box = document.getElementById('vaciarConfirm');
+  if(!objs.length){ box.innerHTML = '<div class="note">No hay objetivos que borrar.</div>'; return; }
+  box.innerHTML = `<div class="err" style="margin-bottom:8px;">Se borrarán ${objs.length} objetivo(s) y ${nReg} check-in(s) ${todo?'de todos los periodos':'del periodo '+currentYear}. No se puede deshacer.</div>
+    <button class="btn" id="btnVaciarSi" style="background:var(--red);border-color:var(--red);">Sí, borrar</button>
+    <button class="btn secondary" id="btnVaciarNo">Cancelar</button>`;
+  document.getElementById('btnVaciarNo').onclick = ()=>{ box.innerHTML=''; };
+  document.getElementById('btnVaciarSi').onclick = async ()=>{
+    const borrar = new Set(objetivosAVaciar().map(o=>o.id));
+    const antes = objectives.length;
+    objectives = objectives.filter(o=>!borrar.has(o.id));
+    registros = registros.filter(r=>!borrar.has(r.objectiveId));
+    await saveObjectives(); await saveRegistros();
+    await logMovement('Vaciar objetivos', `${antes - objectives.length} objetivo(s) borrados · ${todo?'todos los periodos':'periodo '+currentYear}`);
+    box.innerHTML = `<div class="note" style="color:var(--green);">Listo: ${antes - objectives.length} objetivo(s) borrados.</div>`;
+    renderAll();
+  };
 });
 async function init(){
   await loadPeriodos();
