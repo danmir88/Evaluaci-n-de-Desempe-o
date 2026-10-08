@@ -15,6 +15,8 @@ const LEGACY_FILE = path.join(__dirname, 'legacy', 'constructor-objetivos-2026.h
 const LEGACY_SHIM = path.join(__dirname, 'legacy', 'storage-compartido.js');
 const COLLECTIONS = new Set(['objetivos', 'evaluaciones', 'cierres']);
 const MAX_BODY = 8 * 1024 * 1024;
+// Railway define RAILWAY_GIT_COMMIT_SHA en cada despliegue desde GitHub
+const VERSION = (process.env.RAILWAY_GIT_COMMIT_SHA || 'local').slice(0, 7);
 
 // ---------------- Almacenamiento ----------------
 function fileStore(){
@@ -115,13 +117,13 @@ const LEGACY_KEYS = new Set(['objectives-v3', 'registros-v2', 'gerencias-v1', 'a
 
 async function main(){
   const store = process.env.DATABASE_URL ? await pgStore(process.env.DATABASE_URL) : fileStore();
-  console.log(`Almacenamiento: ${store.kind}${APP_PASSWORD ? ' · acceso con contraseña' : ' · SIN contraseña (define APP_PASSWORD)'}`);
+  console.log(`Versión ${VERSION} · Almacenamiento: ${store.kind}${APP_PASSWORD ? ' · acceso con contraseña' : ' · SIN contraseña (define APP_PASSWORD)'}`);
 
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x');
     const p = url.pathname;
     try{
-      if(p === '/api/health') return send(res, 200, {ok: true, store: store.kind});
+      if(p === '/api/health') return send(res, 200, {ok: true, store: store.kind, version: VERSION});
       if(!authorized(req)){
         res.writeHead(401, {'WWW-Authenticate': 'Basic realm="Objetivos FRIGOR", charset="UTF-8"', 'Content-Type': 'text/plain; charset=utf-8'});
         return res.end('Acceso restringido');
