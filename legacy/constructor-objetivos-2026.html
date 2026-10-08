@@ -159,15 +159,18 @@
     <div class="sidebar-view">
       <label>Estoy viendo como</label>
       <select id="viewSelector"></select>
-      <label style="margin-top:12px;">Periodo</label>
-      <select id="periodSelector"></select>
 
     </div>
   </aside>
 
   <main class="content">
     <div class="masthead">
-      <h1>Seguimiento de Objetivos SMART <span class="yearTxt">2026</span></h1>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;">
+        <h1>Seguimiento de Objetivos SMART <span class="yearTxt">2026</span></h1>
+        <label style="display:flex;align-items:center;gap:8px;margin:0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Gestión
+          <select id="periodSelector" style="width:auto;min-width:150px;font-size:15px;font-weight:700;color:var(--navy-dark);text-transform:none;letter-spacing:0;padding:6px 10px;"></select>
+        </label>
+      </div>
       <div class="sub" id="welcomeLine">Cargando…</div>
       <div class="note" id="saveStatus" style="margin-top:6px;"></div>
     </div>
