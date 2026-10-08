@@ -310,6 +310,11 @@ details.ev-more summary{cursor:pointer;color:var(--accent);font-size:12.5px}
         <div id="importResult" style="margin-top:8px"></div>
       </div>
     </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Periodos</h2><p class="small muted">Abre el año para que las gerencias construyan sus objetivos. Al cerrarlo queda en solo lectura. Los mismos periodos rigen en el Constructor original.</p></div>
+        <div class="row"><input type="number" id="perNew" min="2020" max="2100" placeholder="Año, p. ej. 2027" style="width:150px"><button class="btn primary" id="btnAddPer">Abrir periodo</button></div></div>
+      <div class="tbl-wrap"><table id="perTable"></table></div>
+    </div>
     <div class="grid g2">
       <div class="panel">
         <div class="panel-head"><h2>Gerencias</h2></div>
@@ -347,8 +352,12 @@ const PILARES = {
 };
 const QS = ['T1','T2','T3','T4'];
 // Trimestres que se evalúan por año. 2026 es año de transición: solo T3 y T4.
-const ANIOS = {2026:{evalua:['T3','T4'], nota:'Año de transición: se evalúan T3 y T4 con pesos y bandas definidos en octubre 2026.'},
-               2027:{evalua:QS, nota:'Primer año completo del modelo.'}};
+// Los periodos (años) se abren y cierran desde Datos; se comparten con el Constructor original.
+const NOTAS_ANIO = {2026:'Año de transición: se evalúan T3 y T4 con pesos y bandas definidos en octubre 2026.'};
+const PERIODO_INICIAL = {id:'2026', anio:2026, estado:'abierto', evalua:['T3','T4']};
+function periodo(y){ return S.periodos.find(p=>Number(p.anio)===Number(y)); }
+function evaluaDe(y){ const p = periodo(y); return p && Array.isArray(p.evalua) && p.evalua.length ? QS.filter(q=>p.evalua.includes(q)) : QS; }
+function abierto(y){ const p = periodo(y); return !!p && p.estado === 'abierto'; }
 const RATINGS = [
   {n:5, min:115, nombre:'Excepcional', desc:'Supera de forma amplia la mayoría de metas.'},
   {n:4, min:105, nombre:'Supera', desc:'Logra todas las metas y supera varias.'},
@@ -514,7 +523,7 @@ function objIssues(o){
       if(s*k.umbral > s*k.metaAnual) out.push(['bad','El umbral está del lado equivocado de la meta']);
       if(s*k.sobresaliente < s*k.metaAnual) out.push(['bad','El sobresaliente está del lado equivocado de la meta']);
     }
-    const ev = ANIOS[o.anio] ? ANIOS[o.anio].evalua : QS;
+    const ev = evaluaDe(o.anio);
     const miss = ev.filter(q=>!isNum((k.metasQ||{})[q]) && q!=='T4');
     if(miss.length) out.push(['warn','Falta meta acumulada de '+miss.join(', ')]);
     if(!k.fuente) out.push(['warn','Sin fuente de verificación']);
@@ -540,11 +549,11 @@ function scorecardIssues(objs){
 function shortName(o){ const t = o.titulo || (o.kpi||{}).indicador; return (t||'Objetivo').length>70 ? t.slice(0,68)+'…' : (t||'Objetivo'); }
 
 // ====================== Almacenamiento ======================
-const S = {objetivos:{}, evaluaciones:{}, cierres:{}, gerencias:DEFAULT_GERENCIAS.slice(), bitacora:[]};
+const S = {objetivos:{}, evaluaciones:{}, cierres:{}, gerencias:DEFAULT_GERENCIAS.slice(), bitacora:[], periodos:[Object.assign({}, PERIODO_INICIAL)]};
 let DB = null, DL = null, MODE = 'pending';
 const LOCAL_KEY = 'frigor-objetivos-v4';
-function saveLocal(){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify({objetivos:S.objetivos, evaluaciones:S.evaluaciones, cierres:S.cierres, gerencias:S.gerencias, bitacora:S.bitacora})); }catch(e){} }
-function loadLocal(){ try{ const raw = localStorage.getItem(LOCAL_KEY); if(!raw) return; const d = JSON.parse(raw); Object.assign(S, {objetivos:d.objetivos||{}, evaluaciones:d.evaluaciones||{}, cierres:d.cierres||{}, gerencias:d.gerencias||S.gerencias, bitacora:d.bitacora||[]}); }catch(e){} }
+function saveLocal(){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify({objetivos:S.objetivos, evaluaciones:S.evaluaciones, cierres:S.cierres, gerencias:S.gerencias, bitacora:S.bitacora, periodos:S.periodos})); }catch(e){} }
+function loadLocal(){ try{ const raw = localStorage.getItem(LOCAL_KEY); if(!raw) return; const d = JSON.parse(raw); Object.assign(S, {objetivos:d.objetivos||{}, evaluaciones:d.evaluaciones||{}, cierres:d.cierres||{}, gerencias:d.gerencias||S.gerencias, bitacora:d.bitacora||[], periodos:d.periodos||S.periodos}); }catch(e){} }
 
 async function api(method, url, body){
   const r = await fetch(url, {method, headers:{'Content-Type':'application/json'}, body: body===undefined?undefined:JSON.stringify(body)});
@@ -575,6 +584,20 @@ async function saveGerencias(){
   if(MODE === 'server'){ try{ await api('PUT', 'api/config/gerencias', {lista:S.gerencias}); }catch(e){ handleWriteError(e); } }
   else if(MODE === 'shared'){ try{ await DB.doc('config/gerencias').set({lista:S.gerencias}); }catch(e){ handleWriteError(e); } }
   else saveLocal();
+}
+async function savePeriodos(){
+  S.periodos.sort((a,b)=>a.anio-b.anio);
+  if(MODE === 'server'){ try{ await api('PUT', 'api/kv/periodos-v1', {value: JSON.stringify(S.periodos)}); }catch(e){ handleWriteError(e); throw e; } }
+  else if(MODE === 'shared'){ try{ await DB.doc('config/periodos').set({lista:S.periodos}); }catch(e){ handleWriteError(e); throw e; } }
+  else saveLocal();
+}
+async function fetchPeriodosServer(){
+  try{
+    const r = await fetch('api/kv/periodos-v1', {cache:'no-store'}); if(!r.ok) return;
+    const d = await r.json();
+    if(d.value){ const l = JSON.parse(d.value); if(Array.isArray(l) && l.length) S.periodos = l.sort((a,b)=>a.anio-b.anio); }
+    else await savePeriodos();
+  }catch(e){}
 }
 async function logMove(accion, detalle){
   const entry = {f:new Date().toISOString(), quien:userName()||'Sin nombre', accion, detalle};
@@ -612,9 +635,10 @@ async function tryServer(){
     applyServerState(await st.json());
   }catch(e){ return false; }
   MODE = 'server';
+  await fetchPeriodosServer();
   setInterval(async ()=>{
     if(document.hidden) return;
-    try{ const r = await fetch('api/state', {cache:'no-store'}); if(r.ok){ applyServerState(await r.json()); scheduleRender(); } }catch(e){}
+    try{ const r = await fetch('api/state', {cache:'no-store'}); if(r.ok){ applyServerState(await r.json()); await fetchPeriodosServer(); scheduleRender(); } }catch(e){}
   }, 20000);
   return true;
 }
@@ -631,6 +655,7 @@ async function connect(){
         const m = {}; snap.docs.forEach(d=>{ m[d.id] = d.data(); }); S[col] = m; scheduleRender();
       }, err=>{ console.warn(col, err); });
     });
+    DB.doc('config/periodos').onSnapshot(d=>{ if(d.exists && Array.isArray(d.data().lista) && d.data().lista.length){ S.periodos = d.data().lista.slice().sort((a,b)=>a.anio-b.anio); scheduleRender(); } });
     DB.doc('config/gerencias').onSnapshot(d=>{ if(d.exists && Array.isArray(d.data().lista)) { S.gerencias = d.data().lista.slice(); scheduleRender(); } });
     DB.collection('bitacora').onSnapshot(snap=>{
       let all = []; snap.docs.forEach(d=>{ all = all.concat(d.data().items||[]); });
@@ -646,9 +671,9 @@ async function connect(){
 const UI = {view:'inicio', year:2026, ger:'', q:null, coQ:null, showAll:false, calib:false};
 try{ const p = JSON.parse(localStorage.getItem('frigor-ui')||'{}'); if(p.year) UI.year = p.year; if(p.ger) UI.ger = p.ger; }catch(e){}
 function saveUI(){ try{ localStorage.setItem('frigor-ui', JSON.stringify({year:UI.year, ger:UI.ger})); }catch(e){} }
-function years(){ const ys = new Set(Object.keys(ANIOS).map(Number)); Object.values(S.objetivos).forEach(o=>o.anio&&ys.add(Number(o.anio))); return [...ys].sort(); }
+function years(){ const ys = new Set(S.periodos.map(p=>Number(p.anio))); Object.values(S.objetivos).forEach(o=>o.anio&&ys.add(Number(o.anio))); return [...ys].sort(); }
 function currentQ(year){
-  const ev = (ANIOS[year]||{}).evalua || QS;
+  const ev = evaluaDe(year);
   // el trimestre a evaluar es el último cerrado del año en curso
   const d = new Date(); const y = d.getFullYear(); const m = d.getMonth()+1;
   if(year < y) return ev[ev.length-1];
@@ -661,7 +686,8 @@ function gerNames(){ return S.gerencias.map(g=>g.nombre); }
 
 function renderCtx(){
   const ys = years();
-  $('#ctxYear').innerHTML = ys.map(y=>`<option value="${y}" ${y===UI.year?'selected':''}>${y}</option>`).join('');
+  if(!ys.includes(UI.year)){ const ab = S.periodos.filter(p=>p.estado==='abierto'); UI.year = Number((ab[ab.length-1]||S.periodos[S.periodos.length-1]||PERIODO_INICIAL).anio); }
+  $('#ctxYear').innerHTML = ys.map(y=>`<option value="${y}" ${y===UI.year?'selected':''}>${y}${abierto(y)?'':' (cerrado)'}</option>`).join('');
   if(!UI.ger || !gerNames().includes(UI.ger)) UI.ger = gerNames()[0] || '';
   $('#ctxGer').innerHTML = S.gerencias.map(g=>`<option ${g.nombre===UI.ger?'selected':''}>${esc(g.nombre)}</option>`).join('');
   const b = $('#storeBadge');
@@ -716,7 +742,8 @@ function renderObjetivos(){
   const objs = UI.showAll ? objsOf(y) : objsOf(y, UI.ger);
   $('#scTitle').textContent = UI.showAll ? `Todos los scorecards ${y}` : `Scorecard ${y} · ${UI.ger}`;
   const w = objs.reduce((a,o)=>a+(N(o.peso)||0),0);
-  $('#scSub').innerHTML = `${objs.length} objetivo(s) · peso total <span class="num">${round(w)}%</span>${ANIOS[y]?' · '+esc(ANIOS[y].nota):''}`;
+  $('#scSub').innerHTML = `${objs.length} objetivo(s) · peso total <span class="num">${round(w)}%</span>${abierto(y)?'':' · <span class="chip warn">Periodo cerrado: solo lectura</span>'}${NOTAS_ANIO[y]?' · '+esc(NOTAS_ANIO[y]):''}`;
+  $('#btnNewObj').hidden = !abierto(y);
   if(!objs.length){
     $('#scTable').innerHTML = `<tbody><tr><td class="empty">No hay objetivos para ${esc(UI.showAll?'este año':UI.ger)} en ${y}. Usa “+ Nuevo objetivo” o importa un respaldo en Datos.</td></tr></tbody>`;
   } else {
@@ -771,7 +798,7 @@ function openEditor(oid){
 function closeEditor(){ ED = null; $('#drawerRoot').innerHTML = ''; }
 function renderEditor(){
   const o = ED, k = o.kpi;
-  const evQs = (ANIOS[o.anio]||{}).evalua || QS;
+  const evQs = evaluaDe(o.anio);
   const kp = o.tipo !== 'hitos';
   $('#drawerRoot').innerHTML = `
   <div class="drawer-bg" id="edBg"><div class="drawer" role="dialog" aria-modal="true" aria-labelledby="edTitle">
@@ -781,7 +808,7 @@ function renderEditor(){
       <fieldset><legend>Qué y para qué</legend>
         <div class="grid g2">
           <label class="field"><span>Gerencia</span><select id="ed-gerencia">${S.gerencias.map(g=>`<option ${g.nombre===o.gerencia?'selected':''}>${esc(g.nombre)}</option>`).join('')}</select></label>
-          <label class="field"><span>Año</span><select id="ed-anio">${[...new Set([...years(), Number(o.anio), UI.year+1])].sort().map(y=>`<option ${Number(y)===Number(o.anio)?'selected':''}>${y}</option>`).join('')}</select></label>
+          <label class="field"><span>Año</span><select id="ed-anio">${[...new Set([...S.periodos.filter(p=>p.estado==='abierto').map(p=>Number(p.anio)), Number(o.anio)])].sort().map(y=>`<option ${Number(y)===Number(o.anio)?'selected':''}>${y}</option>`).join('')}</select></label>
           <label class="field"><span>Pilar estratégico</span><select id="ed-pilar"><option value="">Selecciona…</option>${Object.entries(PILARES).map(([c,p])=>`<option value="${c}" ${o.pilar===c?'selected':''}>${p.corto} — ${p.nombre}</option>`).join('')}</select></label>
           <label class="field"><span>Responsable (ejecutivo evaluado)</span><input id="ed-responsable" value="${esc(o.responsable)}" placeholder="Nombre y cargo"></label>
         </div>
@@ -839,9 +866,9 @@ function renderEditor(){
       <div id="edConfirm"></div>
     </div>
     <div class="drawer-foot">
-      ${o._isNew?'':'<button class="btn danger" id="edDelete" style="margin-right:auto">Eliminar</button><button class="btn" id="edDup">Duplicar para el año siguiente</button>'}
+      ${o._isNew?'':(abierto(o.anio)?'<button class="btn danger" id="edDelete" style="margin-right:auto">Eliminar</button>':'<span style="margin-right:auto"></span>')+'<button class="btn" id="edDup">Duplicar para el año siguiente</button>'}
       <button class="btn" id="edCancel">Cancelar</button>
-      <button class="btn primary" id="edSave">Guardar</button>
+      ${abierto(o.anio)?'<button class="btn primary" id="edSave">Guardar</button>':`<span class="chip warn">Periodo ${esc(o.anio)} cerrado: solo lectura</span>`}
     </div>
   </div></div>`;
   bindEditor(); refreshEditorLive();
@@ -891,7 +918,7 @@ function bindEditor(){
     QS.forEach((q,i)=>{ $('#q-'+q).value = round(b + (m-b)*(i+1)/4, 2); }); refreshEditorLive();
   };
   const qf = $('#btnQFlat'); if(qf) qf.onclick = ()=>{ readEditor(); const m = N(ED.kpi.metaAnual); if(m===null){ toast('Ingresa la meta anual.'); return; } QS.forEach(q=>{ $('#q-'+q).value = m; }); refreshEditorLive(); };
-  $('#edSave').onclick = saveEditor;
+  const sv = $('#edSave'); if(sv) sv.onclick = saveEditor;
   const d = $('#edDelete'); if(d) d.onclick = ()=>{
     const evs = Object.keys(S.evaluaciones).filter(id=>id.startsWith(ED.id+'__')).length;
     $('#edConfirm').innerHTML = `<div class="confirm-bar"><span>¿Eliminar este objetivo${evs?` y sus ${evs} evaluación(es)`:''}? No se puede deshacer.</span><button class="btn danger" id="edDelYes">Sí, eliminar</button><button class="btn" id="edDelNo">No</button></div>`;
@@ -908,6 +935,7 @@ function bindEditor(){
   };
   const dup = $('#edDup'); if(dup) dup.onclick = async ()=>{
     readEditor();
+    if(!abierto(Number(ED.anio)+1)){ toast(`Primero abre el periodo ${Number(ED.anio)+1} en Datos → Periodos.`); return; }
     const c = JSON.parse(JSON.stringify(ED)); delete c._isNew;
     c.id = newId('ob'); c.anio = Number(ED.anio)+1; c.estado = 'borrador';
     if(c.tipo!=='hitos'){
@@ -922,6 +950,7 @@ function bindEditor(){
 }
 async function saveEditor(){
   readEditor();
+  if(!abierto(ED.anio)){ toast(`El periodo ${ED.anio} está cerrado.`); return; }
   const o = JSON.parse(JSON.stringify(ED)); const isNew = o._isNew; delete o._isNew;
   if(!o.gerencia){ toast('Elige la gerencia.'); return; }
   if(o.tipo==='hitos'){ o.hitos = o.hitos.filter(h=>h.nombre||h.peso); o.hitos.forEach(h=>{ if(!h.id) h.id=newId('h'); }); }
@@ -937,16 +966,17 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape' && ED) closeEditor
 // ====================== Vista: Evaluación ======================
 function cierreId(g, y, q){ return slug(g)+'__'+y+'-'+q; }
 function renderEvaluacion(){
-  const y = UI.year, evQs = (ANIOS[y]||{}).evalua || QS;
+  const y = UI.year, evQs = evaluaDe(y);
   if(!UI.q || !evQs.includes(UI.q)) UI.q = currentQ(y);
   const q = UI.q;
   $('#evQSeg').innerHTML = QS.map(x=>`<button type="button" data-q="${x}" aria-pressed="${x===q}" ${evQs.includes(x)?'':'disabled title="No se evalúa este año"'}>${x}</button>`).join('');
   const objs = objsOf(y, UI.ger);
   const cierre = S.cierres[cierreId(UI.ger,y,q)] || {estado:'abierta'};
-  const locked = cierre.estado !== 'abierta' && !UI.calib;
+  const perCerrado = !abierto(y);
+  const locked = perCerrado || (cierre.estado !== 'abierta' && !UI.calib);
   $('#evTitle').textContent = `Evaluación ${q} ${y} · ${UI.ger}`;
   $('#evSub').innerHTML = `Resultado acumulado al cierre de ${q}${q==='T4'?' (equivale al resultado anual)':''}. Estado: <span class="chip ${cierre.estado==='calibrada'?'ok':cierre.estado==='enviada'?'acc':''}">${ESTADOS_CIERRE[cierre.estado]}</span>${cierre.por?` <span class="small muted">por ${esc(cierre.por)} el ${esc((cierre.fecha||'').slice(0,10))}</span>`:''}`;
-  $('#evClosedNote').innerHTML = locked ? '<p class="hint info" style="margin-bottom:10px">La evaluación fue enviada. Para corregir, actívala en modo calibración o reábrela.</p>' : '';
+  $('#evClosedNote').innerHTML = perCerrado ? `<p class="hint info" style="margin-bottom:10px">El periodo ${y} está cerrado: solo lectura.</p>` : locked ? '<p class="hint info" style="margin-bottom:10px">La evaluación fue enviada. Para corregir, actívala en modo calibración o reábrela.</p>' : '';
   if(!objs.length){ $('#evTable').innerHTML = `<tbody><tr><td class="empty">${esc(UI.ger)} no tiene objetivos en ${y}.</td></tr></tbody>`; $('#evTotal').innerHTML=''; $('#evActions').innerHTML=''; return; }
   const calib = UI.calib;
   $('#evTable').innerHTML = `<thead><tr><th>Objetivo</th><th class="r">Peso</th><th class="r">Umbral</th><th class="r">Meta ${q}</th><th class="r">Sobresal.</th><th>Real / hitos</th><th class="r">Puntaje</th>${calib?'<th>Ajuste calibración</th>':''}<th>Calificación</th><th>Comentario y confianza</th></tr></thead><tbody>${
@@ -987,6 +1017,7 @@ function renderEvaluacion(){
   if(cierre.estado==='abierta') acts.push(`<button class="btn primary" data-cierre="enviada" ${r.cobertura<100?'title="Hay objetivos sin resultado"':''}>Enviar a GTH</button>`);
   if(cierre.estado==='enviada') acts.push('<button class="btn" data-cierre="abierta">Reabrir</button><button class="btn primary" data-cierre="calibrada">Marcar calibrada</button>');
   if(cierre.estado==='calibrada') acts.push('<button class="btn" data-cierre="enviada">Volver a enviada</button>');
+  if(perCerrado){ $('#evActions').innerHTML = ''; return; }
   $('#evActions').innerHTML = (r.cobertura<100 && cierre.estado==='abierta' ? `<span class="small muted">Falta registrar ${round(100-r.cobertura)}% del peso.</span>` : '') + acts.join('');
 }
 let evTimers = {};
@@ -1030,7 +1061,7 @@ $('#evActions').addEventListener('click', async e=>{
 
 // ====================== Vista: Consolidado ======================
 function renderConsolidado(){
-  const y = UI.year, evQs = (ANIOS[y]||{}).evalua || QS;
+  const y = UI.year, evQs = evaluaDe(y);
   if(!UI.coQ || !evQs.includes(UI.coQ)) UI.coQ = currentQ(y);
   const gers = gerNames().filter(g=>objsOf(y,g).length);
   const rows = gers.map(g=>{
@@ -1108,7 +1139,7 @@ $('#btnCsvObj').addEventListener('click', ()=>{
   offerFile(`objetivos_frigor_${y}.csv`, csv(rows));
 });
 $('#btnCsvEval').addEventListener('click', ()=>{
-  const y = UI.year, evQs = (ANIOS[y]||{}).evalua || QS;
+  const y = UI.year, evQs = evaluaDe(y);
   const rows = [['Año','Trimestre','Gerencia','ID objetivo','Objetivo','Peso %','Umbral','Meta trimestre','Sobresaliente','Real','Hitos cumplidos','Puntaje calculado','Ajuste','Motivo ajuste','Puntaje final','Calificación','Confianza','Comentario','Estado evaluación']];
   evQs.forEach(q=>objsOf(y).forEach(o=>{
     if(!hasTargetIn(o,q)) return;
@@ -1121,7 +1152,7 @@ $('#btnCsvEval').addEventListener('click', ()=>{
   offerFile(`evaluaciones_frigor_${y}.csv`, csv(rows));
 });
 $('#btnJsonBackup').addEventListener('click', ()=>{
-  const data = {formato:'frigor-objetivos-v4', exportado:new Date().toISOString(), objetivos:Object.values(S.objetivos), evaluaciones:S.evaluaciones, cierres:S.cierres, gerencias:S.gerencias};
+  const data = {formato:'frigor-objetivos-v4', exportado:new Date().toISOString(), objetivos:Object.values(S.objetivos), evaluaciones:S.evaluaciones, cierres:S.cierres, gerencias:S.gerencias, periodos:S.periodos};
   offerFile(`respaldo_objetivos_frigor_${today()}.json`, JSON.stringify(data, null, 2));
 });
 
@@ -1181,7 +1212,8 @@ $('#btnFromLegacy').addEventListener('click', async ()=>{
 async function importData(data, nombre){
   let objs=[], evs={}, cierres={}, origen='';
   if(data.formato === 'frigor-objetivos-v4'){ objs = data.objetivos||[]; evs = data.evaluaciones||{}; cierres = data.cierres||{}; origen='respaldo';
-    if(Array.isArray(data.gerencias)){ data.gerencias.forEach(g=>{ if(!gerNames().includes(g.nombre)) S.gerencias.push(g); }); await saveGerencias(); } }
+    if(Array.isArray(data.gerencias)){ data.gerencias.forEach(g=>{ if(!gerNames().includes(g.nombre)) S.gerencias.push(g); }); await saveGerencias(); }
+    if(Array.isArray(data.periodos)){ const nuevos = data.periodos.filter(p=>!periodo(p.anio)); if(nuevos.length){ S.periodos.push(...nuevos); await savePeriodos(); } } }
   else if(Array.isArray(data.objectives)){ const c = convertOld(data); objs = c.objs; evs = c.evs; origen='Constructor SMART anterior'; }
   else { $('#importResult').innerHTML = '<p class="hint">No reconozco el formato. Usa un respaldo de esta herramienta o el .json exportado del Constructor anterior.</p>'; return; }
   let add=0, upd=0, ne=0;
@@ -1197,7 +1229,43 @@ async function importData(data, nombre){
   $('#importResult').innerHTML = `<p class="hint info">Desde ${esc(origen)}: ${add} objetivos nuevos, ${upd} actualizados y ${ne} evaluaciones.${origen!=='respaldo'?' Revisa pesos, umbral y sobresaliente: el Constructor anterior no los tenía.':''}</p>`;
   renderAll();
 }
+function renderPeriodosTable(){
+  $('#perTable').innerHTML = `<thead><tr><th>Año</th><th>Estado</th><th>Trimestres que se evalúan</th><th class="r">Objetivos</th><th></th></tr></thead><tbody>${
+    S.periodos.map(p=>`<tr><td class="num"><b>${esc(p.anio)}</b></td>
+      <td><span class="chip ${p.estado==='abierto'?'ok':''}">${p.estado==='abierto'?'Abierto':'Cerrado'}</span></td>
+      <td><div class="row">${QS.map(q=>`<label class="row small" style="gap:4px"><input type="checkbox" data-per="${esc(p.anio)}" data-q="${q}" ${evaluaDe(p.anio).includes(q)?'checked':''}> ${q}</label>`).join('')}</div></td>
+      <td class="r num">${objsOf(p.anio).length}</td>
+      <td class="r"><button class="btn" data-toggle-per="${esc(p.anio)}">${p.estado==='abierto'?'Cerrar':'Reabrir'}</button></td></tr>`).join('')}</tbody>`;
+}
+$('#perTable').addEventListener('change', async e=>{
+  const t = e.target; if(!t.dataset.per) return;
+  const p = periodo(t.dataset.per); if(!p) return;
+  const set = new Set(evaluaDe(p.anio)); if(t.checked) set.add(t.dataset.q); else set.delete(t.dataset.q);
+  if(!set.size){ toast('Debe evaluarse al menos un trimestre.'); renderPeriodosTable(); return; }
+  p.evalua = QS.filter(q=>set.has(q));
+  try{ await savePeriodos(); }catch(err){ return; }
+  await logMove('Trimestres evaluados', `${p.anio}: ${p.evalua.join(', ')}`); renderAll();
+});
+$('#perTable').addEventListener('click', async e=>{
+  const b = e.target.closest('button[data-toggle-per]'); if(!b) return;
+  const p = periodo(b.dataset.togglePer); if(!p) return;
+  p.estado = p.estado==='abierto' ? 'cerrado' : 'abierto';
+  try{ await savePeriodos(); }catch(err){ return; }
+  await logMove(p.estado==='abierto'?'Reabrir periodo':'Cerrar periodo', String(p.anio));
+  toast(`Periodo ${p.anio} ${p.estado==='abierto'?'abierto':'cerrado'}`); renderAll();
+});
+$('#btnAddPer').addEventListener('click', async ()=>{
+  const anio = parseInt($('#perNew').value);
+  if(!anio || anio < 2020 || anio > 2100){ toast('Escribe un año válido.'); return; }
+  if(periodo(anio)){ toast('Ese periodo ya existe. Si está cerrado, usa Reabrir.'); return; }
+  S.periodos.push({id:String(anio), anio, estado:'abierto', evalua:QS.slice()});
+  try{ await savePeriodos(); }catch(err){ return; }
+  await logMove('Abrir periodo', String(anio));
+  $('#perNew').value = ''; UI.year = anio; saveUI();
+  toast(`Periodo ${anio} abierto`); renderAll();
+});
 function renderDatos(){
+  renderPeriodosTable();
   $('#legacyRow').hidden = MODE !== 'server';
   $('#gerTable').innerHTML = `<thead><tr><th>Gerencia</th><th>Depende de</th><th class="r">Obj. ${UI.year}</th></tr></thead><tbody>${S.gerencias.map(g=>`<tr><td>${esc(g.nombre)}</td><td class="small muted">${esc(g.dependeDe)}</td><td class="r num">${objsOf(UI.year,g.nombre).length}</td></tr>`).join('')}</tbody>`;
   $('#gerParent').innerHTML = ['Directorio', ...gerNames()].map(n=>`<option>${esc(n)}</option>`).join('');

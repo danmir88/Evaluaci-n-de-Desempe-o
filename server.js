@@ -111,7 +111,7 @@ function legacyHtml(){
     '<title>Constructor de Objetivos SMART 2026</title><script>' + shim + '</script></head><body>' +
     body + '</body></html>';
 }
-const LEGACY_KEYS = new Set(['objectives-v3', 'registros-v2', 'gerencias-v1', 'audit-log-v1']);
+const LEGACY_KEYS = new Set(['objectives-v3', 'registros-v2', 'gerencias-v1', 'audit-log-v1', 'periodos-v1']);
 
 async function main(){
   const store = process.env.DATABASE_URL ? await pgStore(process.env.DATABASE_URL) : fileStore();

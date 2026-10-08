@@ -77,6 +77,7 @@
   async function refresh(){
     if(busy()){ queueRefresh(5000); return; }
     try{
+      if(typeof loadPeriodos === 'function') await loadPeriodos();
       if(typeof loadAuditLog === 'function') await loadAuditLog();
       if(typeof renderLogTable === 'function') renderLogTable();
       if(typeof loadGerencias === 'function'){
