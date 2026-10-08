@@ -395,6 +395,9 @@
         </div>
         <label>Gerencia</label>
         <select id="moverGerencia"></select>
+        <label style="margin-top:10px;">Objetivos a mover</label>
+        <div style="margin:4px 0;"><label style="display:inline-flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-weight:400;"><input type="checkbox" id="moverTodos" style="width:auto;"> Seleccionar todos</label></div>
+        <div id="moverLista" style="max-height:260px;overflow-y:auto;border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:#fff;"></div>
         <div class="modal-actions" style="justify-content:flex-start;margin-top:10px;">
           <button class="btn secondary" id="btnMover">Revisar y mover…</button>
         </div>
@@ -638,6 +641,7 @@ function renderPeriodos(){
   ['moverDesde','moverHacia'].forEach((id,i)=>{ const el = document.getElementById(id); if(el && document.activeElement !== el){ const prev = el.value; el.innerHTML = opts; el.value = prev && [...el.options].some(x=>x.value===prev) ? prev : String(i===0 ? (PERIODOS[0]||{}).anio : currentYear); } });
   const mg = document.getElementById('moverGerencia');
   if(mg && document.activeElement !== mg){ const prev = mg.value; const areas = [...new Set([...GERENCIAS.map(g=>g.nombre), ...objectives.map(o=>o.area)])]; mg.innerHTML = '<option value="">Todas las gerencias</option>' + areas.map(a=>`<option>${htmlSafe(a)}</option>`).join(''); mg.value = prev || ''; }
+  if(!document.querySelector('.moverChk:checked')) renderMoverLista();
   const wrap = document.getElementById('periodosListWrap');
   if(wrap){
     wrap.innerHTML = `<table><thead><tr><th>Año</th><th>Estado</th><th>Objetivos</th><th></th></tr></thead><tbody>${
@@ -2127,27 +2131,45 @@ document.getElementById('btnAddPeriodo').addEventListener('click', async ()=>{
   el.innerHTML = `<span style="color:var(--green);">Periodo ${anio} abierto. Ya pueden construir objetivos ${anio}.</span>`;
   updateWelcomeLine(); renderAll();
 });
+function renderMoverLista(){
+  const lista = document.getElementById('moverLista'); if(!lista) return;
+  const desde = Number(document.getElementById('moverDesde').value);
+  const ger = document.getElementById('moverGerencia').value;
+  const objs = objectives.filter(o=>anioDe(o)===desde && (!ger || o.area===ger))
+    .sort((a,b)=>a.area.localeCompare(b.area,'es'));
+  document.getElementById('moverTodos').checked = false;
+  lista.innerHTML = objs.length ? objs.map(o=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--line);text-transform:none;letter-spacing:0;font-weight:400;font-size:12.5px;color:var(--ink);">
+      <input type="checkbox" class="moverChk" value="${htmlSafe(o.id)}" style="width:auto;margin-top:2px;">
+      <span><b>${htmlSafe(o.area)}</b><br>${htmlSafe(composeObjectiveText(o))}</span></label>`).join('')
+    : `<div class="note">No hay objetivos en ${desde}${ger?' para '+htmlSafe(ger):''}.</div>`;
+  document.getElementById('moverConfirm').innerHTML = '';
+}
+['moverDesde','moverGerencia'].forEach(id=>document.getElementById(id).addEventListener('change', renderMoverLista));
+document.getElementById('moverTodos').addEventListener('change', e=>{
+  document.querySelectorAll('.moverChk').forEach(c=>{ c.checked = e.target.checked; });
+});
 document.getElementById('btnMover').addEventListener('click', ()=>{
   const desde = Number(document.getElementById('moverDesde').value);
   const hacia = Number(document.getElementById('moverHacia').value);
   const ger = document.getElementById('moverGerencia').value;
   const box = document.getElementById('moverConfirm');
   if(desde === hacia){ box.innerHTML = '<div class="err">Elige dos periodos distintos.</div>'; return; }
-  const sel = objectives.filter(o=>anioDe(o)===desde && (!ger || o.area===ger));
-  if(!sel.length){ box.innerHTML = `<div class="note">No hay objetivos en ${desde}${ger?' para '+htmlSafe(ger):''}.</div>`; return; }
+  const elegidos = new Set([...document.querySelectorAll('.moverChk:checked')].map(c=>c.value));
+  const sel = objectives.filter(o=>elegidos.has(o.id) && anioDe(o)===desde);
+  if(!sel.length){ box.innerHTML = '<div class="err">Marca al menos un objetivo de la lista.</div>'; return; }
   const ids = new Set(sel.map(o=>o.id));
   const nReg = registros.filter(r=>ids.has(r.objectiveId)).length;
   box.innerHTML = `<div class="note" style="margin-bottom:8px;">Se moverán <b>${sel.length} objetivo(s)</b>${nReg?` y ${nReg} check-in(s)`:''} de <b>${desde}</b> a <b>${hacia}</b>${ger?' ('+htmlSafe(ger)+')':''}.</div>
     <button class="btn" id="btnMoverSi">Sí, mover</button> <button class="btn secondary" id="btnMoverNo">Cancelar</button>`;
   document.getElementById('btnMoverNo').onclick = ()=>{ box.innerHTML=''; };
   document.getElementById('btnMoverSi').onclick = async ()=>{
-    const mover = new Set(objectives.filter(o=>anioDe(o)===desde && (!ger || o.area===ger)).map(o=>o.id));
+    const mover = new Set(sel.map(o=>o.id));
     objectives = objectives.map(o=>mover.has(o.id) ? moverObjetivoDeAnio(o, hacia) : o);
     registros = registros.map(r=>mover.has(r.objectiveId) ? {...r, fecha: shiftKey(r.fecha, desde, hacia)} : r);
     await saveObjectives(); await saveRegistros();
     await logMovement('Mover objetivos de periodo', `${mover.size} objetivo(s) de ${desde} a ${hacia}${ger?' · '+ger:''}`);
+    renderAll(); renderMoverLista();
     box.innerHTML = `<div class="note" style="color:var(--green);">Listo: ${mover.size} objetivo(s) movidos a ${hacia}.</div>`;
-    renderAll();
   };
 });
 function objetivosAVaciar(){
