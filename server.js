@@ -11,14 +11,16 @@ const PORT = Number(process.env.PORT) || 3000;
 const APP_PASSWORD = process.env.APP_PASSWORD || '';
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'storage');
 const PAGE_FILE = path.join(__dirname, 'app', 'objetivos-frigor.html');
+const LEGACY_FILE = path.join(__dirname, 'legacy', 'constructor-objetivos-2026.html');
+const LEGACY_SHIM = path.join(__dirname, 'legacy', 'storage-compartido.js');
 const COLLECTIONS = new Set(['objetivos', 'evaluaciones', 'cierres']);
-const MAX_BODY = 1024 * 1024;
+const MAX_BODY = 8 * 1024 * 1024;
 
 // ---------------- Almacenamiento ----------------
 function fileStore(){
   const file = path.join(DATA_DIR, 'datos.json');
   fs.mkdirSync(DATA_DIR, {recursive: true});
-  let state = {objetivos:{}, evaluaciones:{}, cierres:{}, config:{}, bitacora:[]};
+  let state = {objetivos:{}, evaluaciones:{}, cierres:{}, config:{}, kv:{}, bitacora:[]};
   try{ state = Object.assign(state, JSON.parse(fs.readFileSync(file, 'utf8'))); }catch(e){ /* primer arranque */ }
   let writing = Promise.resolve();
   const persist = () => {
@@ -28,7 +30,8 @@ function fileStore(){
   };
   return {
     kind: 'archivo',
-    async all(){ return state; },
+    async all(){ const {kv, ...rest} = state; return rest; },
+    async get(col, id){ return (state[col] || {})[id] ?? null; },
     async put(col, id, data){ state[col][id] = data; await persist(); },
     async del(col, id){ delete state[col][id]; await persist(); },
     async setConfig(id, data){ state.config[id] = data; await persist(); },
@@ -51,13 +54,14 @@ async function pgStore(url){
     kind: 'postgres',
     async all(){
       const out = {objetivos:{}, evaluaciones:{}, cierres:{}, config:{}, bitacora:[]};
-      const {rows} = await pool.query('SELECT col, id, data FROM docs');
+      const {rows} = await pool.query("SELECT col, id, data FROM docs WHERE col <> 'kv'");
       rows.forEach(r => { if(out[r.col]) out[r.col][r.id] = r.data; });
       const log = await pool.query('SELECT entry FROM (SELECT n, entry FROM bitacora ORDER BY n DESC LIMIT 500) t ORDER BY n');
       out.bitacora = log.rows.map(r => r.entry);
       return out;
     },
     put: upsert,
+    async get(col, id){ const {rows} = await pool.query('SELECT data FROM docs WHERE col=$1 AND id=$2', [col, id]); return rows.length ? rows[0].data : null; },
     async del(col, id){ await pool.query('DELETE FROM docs WHERE col=$1 AND id=$2', [col, id]); },
     async setConfig(id, data){ await upsert('config', id, data); },
     async log(entry){ await pool.query('INSERT INTO bitacora (entry) VALUES ($1)', [entry]); },
@@ -98,6 +102,17 @@ function pageHtml(){
     body + '</body></html>';
 }
 
+// Constructor SMART 2026 original, sin cambios, con el almacenamiento compartido inyectado antes de su script
+function legacyHtml(){
+  const body = fs.readFileSync(LEGACY_FILE, 'utf8');
+  const shim = fs.readFileSync(LEGACY_SHIM, 'utf8');
+  return '<!doctype html><html lang="es"><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<title>Constructor de Objetivos SMART 2026</title><script>' + shim + '</script></head><body>' +
+    body + '</body></html>';
+}
+const LEGACY_KEYS = new Set(['objectives-v3', 'registros-v2', 'gerencias-v1', 'audit-log-v1']);
+
 async function main(){
   const store = process.env.DATABASE_URL ? await pgStore(process.env.DATABASE_URL) : fileStore();
   console.log(`Almacenamiento: ${store.kind}${APP_PASSWORD ? ' · acceso con contraseña' : ' · SIN contraseña (define APP_PASSWORD)'}`);
@@ -112,6 +127,18 @@ async function main(){
         return res.end('Acceso restringido');
       }
       if(req.method === 'GET' && (p === '/' || p === '/index.html')) return send(res, 200, pageHtml(), 'text/html; charset=utf-8');
+      if(req.method === 'GET' && (p === '/constructor' || p === '/constructor/')) return send(res, 200, legacyHtml(), 'text/html; charset=utf-8');
+      let k = /^\/(?:constructor\/)?api\/kv\/([a-z0-9-]+)$/.exec(p);
+      if(k){
+        if(!LEGACY_KEYS.has(k[1])) return send(res, 404, {error: 'clave desconocida'});
+        if(req.method === 'GET'){ const d = await store.get('kv', k[1]); return send(res, 200, {value: d ? d.value : null}); }
+        if(req.method === 'PUT'){
+          const d = await readJson(req);
+          if(!isObject(d) || typeof d.value !== 'string') return send(res, 400, {error: 'se espera {value: texto}'});
+          try{ JSON.parse(d.value); }catch(e){ return send(res, 400, {error: 'value debe ser JSON'}); }
+          await store.put('kv', k[1], {value: d.value}); return send(res, 200, {ok: true});
+        }
+      }
       if(req.method === 'GET' && p === '/api/state') return send(res, 200, await store.all());
 
       let m = /^\/api\/(objetivos|evaluaciones|cierres)\/([^/]+)$/.exec(p);

@@ -306,6 +306,7 @@ details.ev-more summary{cursor:pointer;color:var(--accent);font-size:12.5px}
           <input type="file" id="importFile" accept=".json,application/json">
         </div>
         <p class="small muted" style="margin-top:8px">Los objetivos con el mismo ID se actualizan; los nuevos se agregan. Del Constructor anterior se toman los objetivos y el último check-in de cada trimestre como valor real.</p>
+        <div class="row" id="legacyRow" style="margin-top:10px" hidden><button class="btn" id="btnFromLegacy">Traer datos del Constructor compartido</button><a class="small" href="constructor">Abrir el Constructor original</a></div>
         <div id="importResult" style="margin-top:8px"></div>
       </div>
     </div>
@@ -1167,6 +1168,17 @@ function convertOld(imported){
 $('#importFile').addEventListener('change', async e=>{
   const f = e.target.files[0]; if(!f) return;
   let data; try{ data = JSON.parse(await f.text()); }catch(err){ $('#importResult').innerHTML = '<p class="hint">El archivo no es un JSON válido.</p>'; return; }
+  await importData(data, f.name); e.target.value='';
+});
+$('#btnFromLegacy').addEventListener('click', async ()=>{
+  try{
+    const get = async k => { const r = await fetch('api/kv/'+k, {cache:'no-store'}); const d = await r.json(); return d.value ? JSON.parse(d.value) : []; };
+    const data = {objectives: await get('objectives-v3'), registros: await get('registros-v2')};
+    if(!data.objectives.length){ $('#importResult').innerHTML = '<p class="hint">El Constructor compartido todavía no tiene objetivos.</p>'; return; }
+    await importData(data, 'Constructor compartido');
+  }catch(err){ $('#importResult').innerHTML = '<p class="hint">No se pudo leer el Constructor compartido.</p>'; }
+});
+async function importData(data, nombre){
   let objs=[], evs={}, cierres={}, origen='';
   if(data.formato === 'frigor-objetivos-v4'){ objs = data.objetivos||[]; evs = data.evaluaciones||{}; cierres = data.cierres||{}; origen='respaldo';
     if(Array.isArray(data.gerencias)){ data.gerencias.forEach(g=>{ if(!gerNames().includes(g.nombre)) S.gerencias.push(g); }); await saveGerencias(); } }
@@ -1181,11 +1193,12 @@ $('#importFile').addEventListener('change', async e=>{
     for(const [id, ev] of Object.entries(evs)){ await put('evaluaciones', id, ev); ne++; }
     for(const [id, c] of Object.entries(cierres)){ await put('cierres', id, c); }
   }catch(err){ $('#importResult').innerHTML = '<p class="hint">La importación se detuvo por un error al guardar. Revisa tu permiso de edición.</p>'; return; }
-  await logMove('Importar '+origen, `${f.name}: ${add} objetivos nuevos, ${upd} actualizados, ${ne} evaluaciones`);
+  await logMove('Importar '+origen, `${nombre}: ${add} objetivos nuevos, ${upd} actualizados, ${ne} evaluaciones`);
   $('#importResult').innerHTML = `<p class="hint info">Desde ${esc(origen)}: ${add} objetivos nuevos, ${upd} actualizados y ${ne} evaluaciones.${origen!=='respaldo'?' Revisa pesos, umbral y sobresaliente: el Constructor anterior no los tenía.':''}</p>`;
-  e.target.value=''; renderAll();
-});
+  renderAll();
+}
 function renderDatos(){
+  $('#legacyRow').hidden = MODE !== 'server';
   $('#gerTable').innerHTML = `<thead><tr><th>Gerencia</th><th>Depende de</th><th class="r">Obj. ${UI.year}</th></tr></thead><tbody>${S.gerencias.map(g=>`<tr><td>${esc(g.nombre)}</td><td class="small muted">${esc(g.dependeDe)}</td><td class="r num">${objsOf(UI.year,g.nombre).length}</td></tr>`).join('')}</tbody>`;
   $('#gerParent').innerHTML = ['Directorio', ...gerNames()].map(n=>`<option>${esc(n)}</option>`).join('');
   if(document.activeElement !== $('#userName')) $('#userName').value = userName();
