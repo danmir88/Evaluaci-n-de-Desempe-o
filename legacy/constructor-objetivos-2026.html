@@ -368,6 +368,8 @@
         <h3>Consolidar un archivo que te manden</h3>
         <div class="note" style="margin-bottom:10px;">Sube el .json que te envíe un gerente (exportado desde su propia sesión de esta misma herramienta). Los objetivos con el mismo ID se actualizan con lo último que manden; los check-ins se agregan sin borrar los que ya tenías.</div>
         <input type="file" id="importJsonInput" accept="application/json,.json">
+        <label style="margin-top:10px;">Cargar en el periodo</label>
+        <select id="importPeriodo"></select>
         <div class="modal-actions" style="justify-content:flex-start;margin-top:14px;">
           <button class="btn" id="btnImportJson">Consolidar archivo</button>
         </div>
@@ -383,6 +385,20 @@
           <button class="btn" id="btnAddPeriodo">Abrir periodo</button>
         </div>
         <div id="periodoAddResult" class="note" style="margin-top:8px;"></div>
+      </div>
+      <div class="card gth-only">
+        <h3>Mover objetivos de periodo</h3>
+        <div class="note" style="margin-bottom:10px;">Pasa objetivos de un año a otro, por ejemplo si se cargaron en el periodo equivocado. Sus metas por mes, la fecha de corte y sus check-ins se trasladan al año de destino.</div>
+        <div class="grid2">
+          <div><label>Desde el periodo</label><select id="moverDesde"></select></div>
+          <div><label>Hacia el periodo</label><select id="moverHacia"></select></div>
+        </div>
+        <label>Gerencia</label>
+        <select id="moverGerencia"></select>
+        <div class="modal-actions" style="justify-content:flex-start;margin-top:10px;">
+          <button class="btn secondary" id="btnMover">Revisar y mover…</button>
+        </div>
+        <div id="moverConfirm" style="margin-top:8px;"></div>
       </div>
       <div class="card gth-only">
         <h3>Vaciar objetivos</h3>
@@ -616,6 +632,12 @@ function renderPeriodos(){
   const nb = document.getElementById('btnNewObjective'); if(nb) nb.style.display = abierto ? '' : 'none';
   const cn = document.getElementById('periodClosedNote'); if(cn) cn.style.display = abierto ? 'none' : '';
   const sr = document.getElementById('btnSaveRegistro'); if(sr) sr.disabled = !abierto;
+  const opts = PERIODOS.map(p=>`<option value="${p.anio}">${p.anio}${p.estado==='abierto'?'':' (cerrado)'}</option>`).join('');
+  const ip = document.getElementById('importPeriodo');
+  if(ip && document.activeElement !== ip){ const prev = ip.value; ip.innerHTML = opts + '<option value="archivo">El año que indica cada objetivo del archivo</option>'; ip.value = prev && [...ip.options].some(x=>x.value===prev) ? prev : String(currentYear); }
+  ['moverDesde','moverHacia'].forEach((id,i)=>{ const el = document.getElementById(id); if(el && document.activeElement !== el){ const prev = el.value; el.innerHTML = opts; el.value = prev && [...el.options].some(x=>x.value===prev) ? prev : String(i===0 ? (PERIODOS[0]||{}).anio : currentYear); } });
+  const mg = document.getElementById('moverGerencia');
+  if(mg && document.activeElement !== mg){ const prev = mg.value; const areas = [...new Set([...GERENCIAS.map(g=>g.nombre), ...objectives.map(o=>o.area)])]; mg.innerHTML = '<option value="">Todas las gerencias</option>' + areas.map(a=>`<option>${htmlSafe(a)}</option>`).join(''); mg.value = prev || ''; }
   const wrap = document.getElementById('periodosListWrap');
   if(wrap){
     wrap.innerHTML = `<table><thead><tr><th>Año</th><th>Estado</th><th>Objetivos</th><th></th></tr></thead><tbody>${
@@ -1876,18 +1898,49 @@ function exportStateJson(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-function mergeImportedState(imported){
-  let objUpdated=0, objAdded=0, regAdded=0, regSkipped=0;
+// Traslada un objetivo (y sus claves de periodo) de un año a otro
+function shiftKey(k, from, to){ return String(k).startsWith(from + '-') ? to + String(k).slice(String(from).length) : k; }
+function moverObjetivoDeAnio(o, to){
+  const from = anioDe(o);
+  const c = {...o, anio: to};
+  if(from === to) return c;
+  if(o.metasIntermedias){ c.metasIntermedias = {}; Object.keys(o.metasIntermedias).forEach(k=>{ c.metasIntermedias[shiftKey(k, from, to)] = o.metasIntermedias[k]; }); }
+  if(c.fechaCorte && String(c.fechaCorte).endsWith('/' + from)) c.fechaCorte = String(c.fechaCorte).slice(0, -4) + to;
+  return c;
+}
+// Plan de carga: a qué año va cada objetivo y si crea o actualiza, sin tocar nada todavía
+function planImportacion(imported, targetYear){
   const importedObjs = Array.isArray(imported.objectives) ? imported.objectives : [];
+  const idMap = {};
+  const plan = importedObjs.map(io=>{
+    const year = targetYear || anioDe(io);
+    let o = moverObjetivoDeAnio(io, year);
+    let existing = objectives.find(x=>x.id===o.id);
+    if(existing && anioDe(existing) !== year){
+      // mismo ID en otro periodo: se crea uno nuevo en vez de sobrescribirlo
+      o = {...o, id: io.id + '-' + year};
+      existing = objectives.find(x=>x.id===o.id);
+    }
+    idMap[io.id] = {id: o.id, from: anioDe(io), to: year};
+    return {o, accion: existing ? 'actualiza' : 'nuevo'};
+  });
+  return {plan, idMap};
+}
+function mergeImportedState(imported, targetYear){
+  let objUpdated=0, objAdded=0, regAdded=0, regSkipped=0;
   const importedRegs = Array.isArray(imported.registros) ? imported.registros : [];
-  importedObjs.forEach(io=>{
-    ensureMetasIntermedias(io);
-    const idx = objectives.findIndex(o=>o.id===io.id);
-    if(idx>=0){ objectives[idx] = {...objectives[idx], ...io}; objUpdated++; }
-    else { objectives.push(io); objAdded++; }
+  const {plan, idMap} = planImportacion(imported, targetYear);
+  plan.forEach(({o})=>{
+    ensureMetasIntermedias(o);
+    const idx = objectives.findIndex(x=>x.id===o.id);
+    if(idx>=0){ objectives[idx] = {...objectives[idx], ...o}; objUpdated++; }
+    else { objectives.push(o); objAdded++; }
   });
   const existingRegIds = new Set(registros.map(r=>r.id));
-  importedRegs.forEach(ir=>{
+  importedRegs.forEach(ir0=>{
+    const m = idMap[ir0.objectiveId];
+    const ir = m ? {...ir0, objectiveId: m.id, fecha: shiftKey(ir0.fecha, m.from, m.to)} : ir0;
+    if(m && m.id !== ir0.objectiveId) ir.id = ir0.id + '-' + m.to;
     if(!existingRegIds.has(ir.id)){ registros.push(ir); regAdded++; existingRegIds.add(ir.id); }
     else { regSkipped++; }
   });
@@ -2034,13 +2087,28 @@ document.getElementById('btnImportJson').addEventListener('click', ()=>{
       resultEl.innerHTML = '<span style="color:var(--red);">El archivo no tiene el formato esperado (objectives / registros).</span>';
       return;
     }
-    const {objUpdated, objAdded, regAdded, regSkipped} = mergeImportedState(parsed);
+    const destino = document.getElementById('importPeriodo').value;
+    const targetYear = destino === 'archivo' ? null : Number(destino);
+    if(targetYear && !periodoDe(targetYear)){ resultEl.innerHTML = '<span style="color:var(--red);">Ese periodo no existe. Ábrelo primero en Periodos.</span>'; return; }
+    const {plan} = planImportacion(parsed, targetYear);
+    const porAnio = {}; plan.forEach(({o})=>{ porAnio[o.anio] = (porAnio[o.anio]||0) + 1; });
+    const aniosArchivo = {}; (parsed.objectives||[]).forEach(io=>{ const y = anioDe(io); aniosArchivo[y] = (aniosArchivo[y]||0) + 1; });
+    const nuevos = plan.filter(x=>x.accion==='nuevo').length, actualiza = plan.length - nuevos;
+    const fmtAnios = m => Object.keys(m).map(y=>`${m[y]} en ${y}`).join(', ') || 'ninguno';
+    resultEl.innerHTML = `<div style="border:1px solid var(--line);border-radius:6px;padding:10px;background:var(--paper);">
+        <div><b>${file.name}</b> trae ${plan.length} objetivo(s) (${fmtAnios(aniosArchivo)}).</div>
+        <div style="margin-top:4px;">Se cargarán así: <b>${fmtAnios(porAnio)}</b>. ${nuevos} nuevo(s)${actualiza?`, ${actualiza} reemplazarán a uno existente con el mismo ID en ese periodo`:''}.</div>
+        <div style="margin-top:8px;"><button class="btn" id="btnImportSi">Confirmar carga</button> <button class="btn secondary" id="btnImportNo">Cancelar</button></div></div>`;
+    document.getElementById('btnImportNo').onclick = ()=>{ resultEl.innerHTML = ''; };
+    document.getElementById('btnImportSi').onclick = async ()=>{
+    const {objUpdated, objAdded, regAdded, regSkipped} = mergeImportedState(parsed, targetYear);
     await saveObjectives();
     await saveRegistros();
-    await logMovement('Consolidar archivo JSON', `${objUpdated} objetivo(s) actualizados, ${objAdded} nuevo(s), ${regAdded} check-in(s) agregados, ${regSkipped} duplicado(s) omitidos. Archivo: ${file.name}`);
+    await logMovement('Consolidar archivo JSON', `${objUpdated} objetivo(s) actualizados, ${objAdded} nuevo(s), ${regAdded} check-in(s) agregados, ${regSkipped} duplicado(s) omitidos. Destino: ${targetYear||'año del archivo'}. Archivo: ${file.name}`);
     renderAll();
     resultEl.innerHTML = `<span style="color:var(--green);">Consolidado: ${objUpdated} objetivo(s) actualizados, ${objAdded} nuevo(s), ${regAdded} check-in(s) agregados${regSkipped?', '+regSkipped+' duplicado(s) omitidos':''}.</span>`;
     input.value = '';
+    };
   };
   reader.readAsText(file);
 });
@@ -2058,6 +2126,29 @@ document.getElementById('btnAddPeriodo').addEventListener('click', async ()=>{
   document.getElementById('newPeriodoAnio').value = '';
   el.innerHTML = `<span style="color:var(--green);">Periodo ${anio} abierto. Ya pueden construir objetivos ${anio}.</span>`;
   updateWelcomeLine(); renderAll();
+});
+document.getElementById('btnMover').addEventListener('click', ()=>{
+  const desde = Number(document.getElementById('moverDesde').value);
+  const hacia = Number(document.getElementById('moverHacia').value);
+  const ger = document.getElementById('moverGerencia').value;
+  const box = document.getElementById('moverConfirm');
+  if(desde === hacia){ box.innerHTML = '<div class="err">Elige dos periodos distintos.</div>'; return; }
+  const sel = objectives.filter(o=>anioDe(o)===desde && (!ger || o.area===ger));
+  if(!sel.length){ box.innerHTML = `<div class="note">No hay objetivos en ${desde}${ger?' para '+htmlSafe(ger):''}.</div>`; return; }
+  const ids = new Set(sel.map(o=>o.id));
+  const nReg = registros.filter(r=>ids.has(r.objectiveId)).length;
+  box.innerHTML = `<div class="note" style="margin-bottom:8px;">Se moverán <b>${sel.length} objetivo(s)</b>${nReg?` y ${nReg} check-in(s)`:''} de <b>${desde}</b> a <b>${hacia}</b>${ger?' ('+htmlSafe(ger)+')':''}.</div>
+    <button class="btn" id="btnMoverSi">Sí, mover</button> <button class="btn secondary" id="btnMoverNo">Cancelar</button>`;
+  document.getElementById('btnMoverNo').onclick = ()=>{ box.innerHTML=''; };
+  document.getElementById('btnMoverSi').onclick = async ()=>{
+    const mover = new Set(objectives.filter(o=>anioDe(o)===desde && (!ger || o.area===ger)).map(o=>o.id));
+    objectives = objectives.map(o=>mover.has(o.id) ? moverObjetivoDeAnio(o, hacia) : o);
+    registros = registros.map(r=>mover.has(r.objectiveId) ? {...r, fecha: shiftKey(r.fecha, desde, hacia)} : r);
+    await saveObjectives(); await saveRegistros();
+    await logMovement('Mover objetivos de periodo', `${mover.size} objetivo(s) de ${desde} a ${hacia}${ger?' · '+ger:''}`);
+    box.innerHTML = `<div class="note" style="color:var(--green);">Listo: ${mover.size} objetivo(s) movidos a ${hacia}.</div>`;
+    renderAll();
+  };
 });
 function objetivosAVaciar(){
   const todo = document.getElementById('vaciarAlcance').value === 'todo';
