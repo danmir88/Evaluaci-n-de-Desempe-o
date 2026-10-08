@@ -550,7 +550,7 @@ function shortName(o){ const t = o.titulo || (o.kpi||{}).indicador; return (t||'
 
 // ====================== Almacenamiento ======================
 const S = {objetivos:{}, evaluaciones:{}, cierres:{}, gerencias:DEFAULT_GERENCIAS.slice(), bitacora:[], periodos:[Object.assign({}, PERIODO_INICIAL)]};
-let DB = null, DL = null, MODE = 'pending';
+let DB = null, DL = null, MODE = 'pending', NO_PERSISTE = false;
 const LOCAL_KEY = 'frigor-objetivos-v4';
 function saveLocal(){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify({objetivos:S.objetivos, evaluaciones:S.evaluaciones, cierres:S.cierres, gerencias:S.gerencias, bitacora:S.bitacora, periodos:S.periodos})); }catch(e){} }
 function loadLocal(){ try{ const raw = localStorage.getItem(LOCAL_KEY); if(!raw) return; const d = JSON.parse(raw); Object.assign(S, {objetivos:d.objetivos||{}, evaluaciones:d.evaluaciones||{}, cierres:d.cierres||{}, gerencias:d.gerencias||S.gerencias, bitacora:d.bitacora||[], periodos:d.periodos||S.periodos}); }catch(e){} }
@@ -631,6 +631,7 @@ async function tryServer(){
   if(!/^https?:$/.test(location.protocol) || window.claude) return false;
   try{
     const h = await fetch('api/health', {cache:'no-store'}); if(!h.ok) return false;
+    try{ const hj = await h.clone().json(); NO_PERSISTE = hj.persistente === false; }catch(e){}
     const st = await fetch('api/state', {cache:'no-store'}); if(!st.ok) return false;
     applyServerState(await st.json());
   }catch(e){ return false; }
@@ -691,7 +692,8 @@ function renderCtx(){
   if(!UI.ger || !gerNames().includes(UI.ger)) UI.ger = gerNames()[0] || '';
   $('#ctxGer').innerHTML = S.gerencias.map(g=>`<option ${g.nombre===UI.ger?'selected':''}>${esc(g.nombre)}</option>`).join('');
   const b = $('#storeBadge');
-  if(MODE==='server'){ b.className='store-badge shared'; b.textContent='Datos compartidos'; b.title='Guardado en el servidor de FRIGOR. Se actualiza cada 20 segundos.'; }
+  if(MODE==='server' && NO_PERSISTE){ b.className='store-badge local'; b.style.background='var(--bad-soft)'; b.style.color='var(--bad)'; b.textContent='Sin base de datos: se borra al actualizar'; b.title='Conecta Postgres en Railway (variable DATABASE_URL).'; }
+  else if(MODE==='server'){ b.className='store-badge shared'; b.textContent='Datos compartidos'; b.title='Guardado en el servidor de FRIGOR. Se actualiza cada 20 segundos.'; }
   else if(MODE==='shared'){ b.className='store-badge shared'; b.textContent='Datos compartidos'; b.title='Todos los que abren este enlace ven y editan los mismos datos.'; }
   else if(MODE==='local'){ b.className='store-badge local'; b.textContent='Solo este navegador'; b.title='Sin conexión a la base compartida. Usa Datos → Respaldo para mover la información.'; }
 }

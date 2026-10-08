@@ -92,4 +92,15 @@
   }
   function queueRefresh(ms){ clearTimeout(timer); timer = setTimeout(refresh, ms); }
   window.addEventListener('load', () => queueRefresh(30000));
+  window.addEventListener('load', () => {
+  // Aviso si el servidor no guarda de forma permanente
+  fetch('api/health', {cache: 'no-store'}).then(r => r.json()).then(h => {
+    if(h.persistente !== false) return;
+    const d = document.createElement('div');
+    d.textContent = 'Atención: el servidor no tiene base de datos conectada. Todo lo que guardes se borrará en la próxima actualización. Avisa a quien administra Railway.';
+    d.setAttribute('role', 'alert');
+    d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#B23A30;color:#fff;padding:10px 16px;font:600 13px system-ui,sans-serif;text-align:center';
+    document.body.appendChild(d);
+  }).catch(() => {});
+  });
 })();

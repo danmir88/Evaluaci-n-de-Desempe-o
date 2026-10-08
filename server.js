@@ -9,7 +9,9 @@ const crypto = require('node:crypto');
 
 const PORT = Number(process.env.PORT) || 3000;
 const APP_PASSWORD = process.env.APP_PASSWORD || '';
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'storage');
+// En Railway, si hay un volumen montado se usa automáticamente
+const DATA_DIR = process.env.DATA_DIR || process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'storage');
+const EN_RAILWAY = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_ENVIRONMENT_NAME || process.env.RAILWAY_PROJECT_ID);
 const PAGE_FILE = path.join(__dirname, 'app', 'objetivos-frigor.html');
 const LEGACY_FILE = path.join(__dirname, 'legacy', 'constructor-objetivos-2026.html');
 const LEGACY_SHIM = path.join(__dirname, 'legacy', 'storage-compartido.js');
@@ -117,13 +119,16 @@ const LEGACY_KEYS = new Set(['objectives-v3', 'registros-v2', 'gerencias-v1', 'a
 
 async function main(){
   const store = process.env.DATABASE_URL ? await pgStore(process.env.DATABASE_URL) : fileStore();
+  // Sin Postgres ni volumen, en Railway el archivo vive en el contenedor y se pierde en cada despliegue
+  const persistente = store.kind === 'postgres' || !EN_RAILWAY || !!process.env.DATA_DIR || !!process.env.RAILWAY_VOLUME_MOUNT_PATH;
+  if(!persistente) console.warn('ATENCIÓN: los datos se borrarán en el próximo despliegue. Conecta Postgres (DATABASE_URL) o un volumen.');
   console.log(`Versión ${VERSION} · Almacenamiento: ${store.kind}${APP_PASSWORD ? ' · acceso con contraseña' : ' · SIN contraseña (define APP_PASSWORD)'}`);
 
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x');
     const p = url.pathname;
     try{
-      if(p === '/api/health') return send(res, 200, {ok: true, store: store.kind, version: VERSION});
+      if(p === '/api/health') return send(res, 200, {ok: true, store: store.kind, persistente, version: VERSION});
       if(!authorized(req)){
         res.writeHead(401, {'WWW-Authenticate': 'Basic realm="Objetivos FRIGOR", charset="UTF-8"', 'Content-Type': 'text/plain; charset=utf-8'});
         return res.end('Acceso restringido');
